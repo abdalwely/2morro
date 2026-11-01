@@ -1,0 +1,57 @@
+{
+  "app_type": "marketing_site",
+  "theme_decision": "dark navy blue, electric blue, white, light gray, cyan accents, RTL Arabic corporate website",
+  "typography": {
+    "heading_font": "Tajawal",
+    "body_font": "IBM Plex Sans Arabic",
+    "hierarchy": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl tracking-tight font-extrabold",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl tracking-tight font-bold",
+      "h3": "text-xl sm:text-2xl font-semibold",
+      "h4": "text-lg sm:text-xl font-medium",
+      "body": "text-base leading-relaxed"
+    }
+  },
+  "colors": {
+    "primary": "#0A192F",
+    "electric_blue": "#0066FF",
+    "cyan_accent": "#00E5FF",
+    "background_light": "#F8FAFC",
+    "background_dark": "#070D1B",
+    "surface_light": "#FFFFFF",
+    "surface_dark": "#112240",
+    "text_primary": "#0F172A",
+    "text_secondary": "#475569",
+    "text_light": "#F1F5F9"
+  },
+  "visual_enhancers": {
+    "glassmorphism": "backdrop-blur-xl bg-slate-900/80 border border-white/10 shadow-2xl",
+    "borders": "border border-slate-200 dark:border-slate-800",
+    "radius": "rounded-xl"
+  },
+  "grids": {
+    "bento": "grid grid-cols-1 md:grid-cols-12 gap-6",
+    "dashboard": "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+  },
+  "motion": {
+    "transitions": "transition-all duration-300 ease-in-out",
+    "hover_lift": "hover:-translate-y-1 hover:shadow-xl"
+  },
+  "accessibility": {
+    "min_contrast": "4.5:1",
+    "focus_states": "focus:ring-2 focus:ring-blue-500 focus:outline-none"
+  },
+  "media": [
+    {
+      "category": "office",
+      "image_url": "https://images.unsplash.com/photo-1559136555-9303baea8ebd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNzl8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjB0ZWNoJTIwY29ycG9yYXRlJTIwc29mdHdhcmUlMjBkZXZlbG9wbWVudCUyMG9mZmljZXxlbnwwfHx8fDE3OTI1MDE5Mzd8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Modern tech office team collaborating"
+    },
+    {
+      "category": "servers",
+      "image_url": "https://images.unsplash.com/photo-1695668548342-c0c1ad479aee?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzV8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwdHJhbnNmb3JtYXRpb24lMjBjbG91ZCUyMHNlcnZlciUyMGFyY2hpdGVjdHVyZXxlbnwwfHx8fDE3OTI1MDE5NDJ8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Enterprise cloud server infrastructure"
+    }
+  ],
+  "instructions_to_main_agent": "Ensure full RTL (dir='rtl') on all public pages and admin panel. Brand name '2Morro Technically Solutions' must remain in Latin script while all surrounding text is in professional Arabic (Tajawal/IBM Plex Sans Arabic). Implement 6 public pages (Home, About, Services with ~20-25 items + detail view, Projects portfolio up to 50 items with filterable grid + detail pages + galleries, Implementation Models page with ~15 phased timelines, Contact page with WhatsApp and email only, no form, 404 page) and a fully secure Arabic admin dashboard at /admin with login, stats overview, full CRUD for services/projects/models, company settings, publish/draft toggles, ordering, and image upload. Ensure high-contrast cards, alternating light/dark sections, zero purple gradients, and robust data-testid on all interactive elements."
+}

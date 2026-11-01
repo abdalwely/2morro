@@ -1,0 +1,164 @@
+D:\projectsFile\projectsWEP\2morro-source.
+│   .gitignore
+│   auth_testing.md
+│   design_guidelines.json
+│   README.md
+│   yarn.lock
+│   
+├───backend
+│   │   .env.example
+│   │   db.py
+│   │   defaults.py
+│   │   models.py
+│   │   pytest.ini
+│   │   requirements.txt
+│   │   routes_admin.py
+│   │   routes_manage.py
+│   │   routes_public.py
+│   │   security.py
+│   │   seed.py
+│   │   seed_en.py
+│   │   server.py
+│   │   storage.py
+│   │   
+│   └───tests
+│           test_2morro_api.py
+│           test_2morro_iter2.py
+│           test_2morro_iter3.py
+│           test_2morro_iter4.py
+│           
+└───frontend
+    │   .env.example
+    │   .gitignore
+    │   components.json
+    │   craco.config.js
+    │   jsconfig.json
+    │   package.json
+    │   postcss.config.js
+    │   README.md
+    │   tailwind.config.js
+    │   yarn.lock
+    │   
+    ├───plugins
+    │   └───health-check
+    │           health-endpoints.js
+    │           webpack-health-plugin.js
+    │           
+    ├───public
+    │       index.html
+    │       robots.txt
+    │       
+    └───src
+        │   App.css
+        │   App.js
+        │   index.css
+        │   index.js
+        │   
+        ├───components
+        │   ├───admin
+        │   │       AdminUI.jsx
+        │   │       
+        │   ├───site
+        │   │       .keep
+        │   │       Cards.jsx
+        │   │       DetailParts.jsx
+        │   │       Footer.jsx
+        │   │       HomeSections.jsx
+        │   │       Navbar.jsx
+        │   │       ProjectParts.jsx
+        │   │       Reveal.jsx
+        │   │       Shared.jsx
+        │   │       
+        │   └───ui
+        │           accordion.jsx
+        │           alert-dialog.jsx
+        │           alert.jsx
+        │           aspect-ratio.jsx
+        │           avatar.jsx
+        │           badge.jsx
+        │           breadcrumb.jsx
+        │           button.jsx
+        │           calendar.jsx
+        │           card.jsx
+        │           carousel.jsx
+        │           checkbox.jsx
+        │           collapsible.jsx
+        │           command.jsx
+        │           context-menu.jsx
+        │           dialog.jsx
+        │           drawer.jsx
+        │           dropdown-menu.jsx
+        │           form.jsx
+        │           hover-card.jsx
+        │           input-otp.jsx
+        │           input.jsx
+        │           label.jsx
+        │           menubar.jsx
+        │           navigation-menu.jsx
+        │           pagination.jsx
+        │           popover.jsx
+        │           progress.jsx
+        │           radio-group.jsx
+        │           resizable.jsx
+        │           scroll-area.jsx
+        │           select.jsx
+        │           separator.jsx
+        │           sheet.jsx
+        │           skeleton.jsx
+        │           slider.jsx
+        │           sonner.jsx
+        │           switch.jsx
+        │           table.jsx
+        │           tabs.jsx
+        │           textarea.jsx
+        │           toast.jsx
+        │           toaster.jsx
+        │           toggle-group.jsx
+        │           toggle.jsx
+        │           tooltip.jsx
+        │           
+        ├───constants
+        │   └───testIds
+        │           auth.js
+        │           home.js
+        │           index.js
+        │           
+        ├───context
+        │       AdminAuthContext.js
+        │       
+        ├───hooks
+        │       use-toast.js
+        │       useSEO.js
+        │       
+        ├───lib
+        │       api.js
+        │       i18n.js
+        │       icons.js
+        │       theme.js
+        │       utils.js
+        │       
+        └───pages
+            │   About.jsx
+            │   Contact.jsx
+            │   Home.jsx
+            │   Models.jsx
+            │   NotFound.jsx
+            │   ProjectDetail.jsx
+            │   Projects.jsx
+            │   ServiceDetail.jsx
+            │   Services.jsx
+            │   
+            └───admin
+                    AppearanceAdmin.jsx
+                    BackupAdmin.jsx
+                    crud.js
+                    Dashboard.jsx
+                    Layout.jsx
+                    Login.jsx
+                    ModelsAdmin.jsx
+                    ProjectsAdmin.jsx
+                    ServicesAdmin.jsx
+                    SettingsAdmin.jsx
+                    SettingsExtras.jsx
+                    UsersAdmin.jsx
+                    
