@@ -12,8 +12,16 @@ from fastapi import APIRouter, Depends, File, HTTPException, Request, Response, 
 from db import db, doc_to_model, new_id, now_iso, log_activity, unique_slug
 from models import ServiceIn, Service, ProjectIn, Project, DeliveryModelIn, DeliveryModel, SettingsIn, PhaseIn
 from defaults import TEXT_KEYS, default_pages
-from security import (clear_auth_cookies, create_access_token, create_refresh_token,
-                      get_staff, hash_password, set_auth_cookies, verify_password)
+from security import (
+    clear_auth_cookies,
+    create_access_token,
+    create_refresh_token,
+    get_staff,
+    hash_password,
+    set_auth_cookies,
+    set_access_cookie,
+    verify_password
+)
 import storage
 
 admin_router = APIRouter(prefix='/api')
@@ -111,8 +119,7 @@ async def refresh(request: Request, response: Response):
     if not user or user.get('active') is False:
         raise HTTPException(status_code=401, detail='جلسة غير صالحة')
     access = create_access_token(payload['sub'], payload.get('email', ''))
-    response.set_cookie(key='access_token', value=access, httponly=True, secure=True,
-                        samesite='none', max_age=60 * 60 * 12, path='/')
+    set_access_cookie(response, access)
     return {'access_token': access}
 
 

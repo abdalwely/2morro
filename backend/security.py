@@ -10,6 +10,35 @@ from db import db
 
 JWT_ALGORITHM = 'HS256'
 
+def get_cookie_settings():
+    secure = os.getenv('COOKIE_SECURE', 'true').lower() == 'true'
+    samesite = os.getenv(
+        'COOKIE_SAMESITE',
+        'none' if secure else 'lax'
+    ).lower()
+
+    if samesite not in ('lax', 'strict', 'none'):
+        raise ValueError('Invalid COOKIE_SAMESITE value')
+
+    if samesite == 'none' and not secure:
+        raise ValueError('SameSite=None requires Secure=True')
+
+    return secure, samesite
+
+
+def set_access_cookie(response, access_token: str):
+    secure, samesite = get_cookie_settings()
+
+    response.set_cookie(
+        key='access_token',
+        value=access_token,
+        httponly=True,
+        secure=secure,
+        samesite=samesite,
+        max_age=60 * 60 * 12,
+        path='/'
+    )
+
 
 def get_jwt_secret() -> str:
     return os.environ['JWT_SECRET']
@@ -46,10 +75,27 @@ def create_refresh_token(user_id: str) -> str:
 
 
 def set_auth_cookies(response, access_token: str, refresh_token: str):
-    response.set_cookie(key='access_token', value=access_token, httponly=True,
-                        secure=True, samesite='none', max_age=60 * 60 * 12, path='/')
-    response.set_cookie(key='refresh_token', value=refresh_token, httponly=True,
-                        secure=True, samesite='none', max_age=604800, path='/')
+    secure, samesite = get_cookie_settings()
+
+    response.set_cookie(
+        key='access_token',
+        value=access_token,
+        httponly=True,
+        secure=secure,
+        samesite=samesite,
+        max_age=60 * 60 * 12,
+        path='/'
+    )
+
+    response.set_cookie(
+        key='refresh_token',
+        value=refresh_token,
+        httponly=True,
+        secure=secure,
+        samesite=samesite,
+        max_age=604800,
+        path='/'
+    )
 
 
 def clear_auth_cookies(response):
@@ -59,13 +105,28 @@ def clear_auth_cookies(response):
 
 def _decode_access_token(token: str) -> dict:
     try:
-        payload = jwt.decode(token, get_jwt_secret(), algorithms=[JWT_ALGORITHM])
+        payload = jwt.decode(
+            token,
+            get_jwt_secret(),
+            algorithms=[JWT_ALGORITHM]
+        )
     except jwt.ExpiredSignatureError as exc:
-        raise HTTPException(status_code=401, detail='انتهت صلاحية الجلسة، يرجى تسجيل الدخول من جديد') from exc
+        raise HTTPException(
+            status_code=401,
+            detail='انتهت صلاحية الجلسة، يرجى تسجيل الدخول من جديد'
+        ) from exc
     except jwt.InvalidTokenError as exc:
-        raise HTTPException(status_code=401, detail='جلسة غير صالحة، يرجى تسجيل الدخول من جديد') from exc
+        raise HTTPException(
+            status_code=401,
+            detail='جلسة غير صالحة، يرجى تسجيل الدخول من جديد'
+        ) from exc
+
     if payload.get('type') != 'access' or not ObjectId.is_valid(payload.get('sub', '')):
-        raise HTTPException(status_code=401, detail='جلسة غير صالحة، يرجى تسجيل الدخول من جديد')
+        raise HTTPException(
+            status_code=401,
+            detail='جلسة غير صالحة، يرجى تسجيل الدخول من جديد'
+        )
+
     return payload
 
 

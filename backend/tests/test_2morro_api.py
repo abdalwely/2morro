@@ -1,5 +1,6 @@
 # Regression tests for 2Morro Technically Solutions API (public, auth, admin CRUD, upload, settings)
 import os
+import uuid
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -77,7 +78,13 @@ class TestAuth:
         assert 'access_token=' in sc and 'HttpOnly' in sc
 
     def test_wrong_password_401(self):
-        r = requests.post(f'{BASE_URL}/api/auth/login', json={'email': 'TEST_nobody@x.com', 'password': 'bad'})
+        test_email = f"TEST_nobody_{uuid.uuid4().hex}@x.com"
+
+        r = requests.post(
+            f'{BASE_URL}/api/auth/login',
+            json={'email': test_email, 'password': 'bad'}
+        )
+
         assert r.status_code == 401
 
     def test_me_bearer(self, auth):

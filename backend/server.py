@@ -6,7 +6,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 from starlette.middleware.cors import CORSMiddleware
 
 load_dotenv(Path(__file__).parent / '.env')
@@ -40,6 +40,19 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title='2Morro Technically Solutions', lifespan=lifespan)
+
+@app.get('/robots.txt', response_class=PlainTextResponse)
+async def robots_txt(request: Request):
+    base_url = str(request.base_url).rstrip('/')
+
+    content = (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Disallow: /admin\n"
+        f"Sitemap: {base_url}/api/sitemap.xml\n"
+    )
+
+    return PlainTextResponse(content=content)
 
 # DEVELOPMENT: backend/.env should list the exact local frontend origins.
 # FUTURE PRODUCTION: add the deployed frontend origin through the environment;

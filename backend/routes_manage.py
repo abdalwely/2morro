@@ -1,3 +1,6 @@
+import asyncio
+import os
+import uuid
 import json
 import re
 from datetime import datetime, timezone
@@ -5,8 +8,17 @@ from datetime import datetime, timezone
 from bson import ObjectId, json_util
 from pymongo.errors import DuplicateKeyError
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile
+from fastapi.responses import FileResponse
+from starlette.background import BackgroundTask
+import tempfile
 
 from db import db, doc_to_model, log_activity, now_iso
+import storage
+from backup_zip import (
+    create_full_backup,
+    restore_full_backup,
+    MAX_ARCHIVE_SIZE,
+)
 from defaults import HEX_RE, TEXT_KEYS, default_pages, default_theme
 from models import ThemeIn, UserCreate, UserUpdate
 from security import get_current_admin, hash_password
@@ -216,6 +228,330 @@ async def restore_backup(file: UploadFile = File(...), mode: str = Form('merge')
     await _seed_admin()
     await log_activity('restore', 'backup', '، '.join(restored), user)
     return {'restored': restored, 'mode': mode}
+
+
+# ---------------- Full ZIP Backup ----------------
+
+@manage_router.post('/backup/zip')
+async def create_zip_backup(
+    admin=Depends(get_current_admin)
+):
+    temp_path = None
+
+    try:
+        # إنشاء ملف ZIP مؤقت يحتوي على قاعدة البيانات والملفات
+        temp_path, summary = await create_full_backup()
+
+        # إنشاء اسم فريد للنسخة الاحتياطية
+        timestamp = datetime.now(timezone.utc).strftime(
+            "%Y%m%d-%H%M%S"
+        )
+
+        filename = (
+            f"2morro-full-{timestamp}-{uuid.uuid4().hex[:8]}.zip"
+        )
+
+        # رفع الملف مباشرة من القرص إلى Supabase Storage
+        upload_result = await asyncio.to_thread(
+            storage.put_backup_file,
+            filename,
+            temp_path
+        )
+
+        return {
+            "success": True,
+            "message": "تم إنشاء النسخة الاحتياطية ZIP ورفعها بنجاح.",
+            "filename": filename,
+            "path": upload_result["path"],
+            "archive_size": upload_result["size"],
+            "collection_count": summary["collection_count"],
+            "collection_counts": summary["collection_counts"],
+            "file_count": summary["file_count"],
+            "total_file_size": summary["total_file_size"],
+            "created_at": summary["created_at"]
+        }
+
+    except Exception:
+        import logging
+        logging.exception("ZIP backup creation failed")
+        raise HTTPException(
+            status_code=500,
+            detail="تعذر إنشاء النسخة الاحتياطية ZIP أو رفعها."
+        )
+
+    finally:
+        # حذف الملف المؤقت من جهاز الخادم بعد انتهاء العملية
+        if temp_path and os.path.isfile(temp_path):
+            try:
+                os.remove(temp_path)
+            except OSError:
+                pass
+
+
+@manage_router.get('/backup/zip')
+async def list_zip_backups(
+    limit: int = 100,
+    offset: int = 0,
+    admin=Depends(get_current_admin)
+):
+    try:
+        if limit < 1 or limit > 100:
+            raise HTTPException(
+                status_code=400,
+                detail="يجب أن يكون limit بين 1 و100."
+            )
+
+        if offset < 0:
+            raise HTTPException(
+                status_code=400,
+                detail="قيمة offset غير صحيحة."
+            )
+
+        objects = await asyncio.to_thread(
+            storage.list_backup_objects,
+            limit=limit,
+            offset=offset
+        )
+
+        backups = []
+
+        for item in objects:
+            filename = item.get("name", "")
+
+            # عرض النسخ التي أنشأها النظام فقط.
+            if not re.fullmatch(
+                r"2morro-full-\d{8}-\d{6}-[a-f0-9]{8}\.zip",
+                filename
+            ):
+                continue
+
+            metadata = item.get("metadata") or {}
+
+            backups.append({
+                "filename": filename,
+                "path": filename,
+                "size": metadata.get("size"),
+                "content_type": metadata.get("mimetype"),
+                "created_at": item.get("created_at"),
+                "updated_at": item.get("updated_at")
+            })
+
+        return {
+            "success": True,
+            "count": len(backups),
+            "limit": limit,
+            "offset": offset,
+            "backups": backups
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception:
+        import logging
+        logging.exception("ZIP backup listing failed")
+
+        raise HTTPException(
+            status_code=500,
+            detail="تعذر جلب قائمة النسخ الاحتياطية."
+        )
+
+
+@manage_router.get('/backup/zip/{filename}')
+async def download_zip_backup(
+    filename: str,
+    admin=Depends(get_current_admin)
+):
+    if not re.fullmatch(
+        r"2morro-full-\d{8}-\d{6}-[a-f0-9]{8}\.zip",
+        filename
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="اسم ملف النسخة الاحتياطية غير صالح."
+        )
+
+    temp_path = None
+
+    try:
+        with tempfile.NamedTemporaryFile(
+            suffix=".zip",
+            delete=False
+        ) as temp_file:
+            temp_path = temp_file.name
+
+        download_info = await asyncio.to_thread(
+            storage.download_backup_to_file,
+            filename,
+            temp_path,
+            max_size=MAX_ARCHIVE_SIZE,
+        )
+
+        if download_info["size"] <= 0:
+            raise HTTPException(
+                status_code=422,
+                detail="ملف النسخة الاحتياطية فارغ."
+            )
+
+        return FileResponse(
+            path=temp_path,
+            media_type="application/zip",
+            filename=filename,
+            background=BackgroundTask(
+                os.remove,
+                temp_path
+            )
+        )
+
+    except HTTPException:
+        if temp_path and os.path.isfile(temp_path):
+            try:
+                os.remove(temp_path)
+            except OSError:
+                pass
+        raise
+
+    except Exception:
+        import logging
+        logging.exception(
+            "ZIP backup download failed: %s",
+            filename
+        )
+
+        if temp_path and os.path.isfile(temp_path):
+            try:
+                os.remove(temp_path)
+            except OSError:
+                pass
+
+        raise HTTPException(
+            status_code=500,
+            detail="تعذر تنزيل النسخة الاحتياطية."
+        )
+
+@manage_router.delete('/backup/zip/{filename}')
+async def delete_zip_backup(
+    filename: str,
+    admin=Depends(get_current_admin)
+):
+    # السماح فقط بأسماء النسخ التي ينشئها النظام
+    if not re.fullmatch(
+        r"2morro-full-\d{8}-\d{6}-[a-f0-9]{8}\.zip",
+        filename
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="اسم ملف النسخة الاحتياطية غير صالح."
+        )
+
+    try:
+        await asyncio.to_thread(
+            storage.delete_backup_object,
+            filename
+        )
+
+        return {
+            "success": True,
+            "message": "تم إرسال طلب حذف النسخة الاحتياطية بنجاح.",
+            "filename": filename
+        }
+
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="تعذر حذف النسخة الاحتياطية."
+        )
+
+
+@manage_router.post('/backup/zip/{filename}/restore')
+async def restore_zip_backup(
+    filename: str,
+    admin=Depends(get_current_admin),
+):
+    if not re.fullmatch(
+        r"2morro-full-\d{8}-\d{6}-[a-f0-9]{8}\.zip",
+        filename,
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="اسم ملف النسخة الاحتياطية غير صالح.",
+        )
+
+    temp_path = None
+
+    try:
+        with tempfile.NamedTemporaryFile(
+            prefix="2morro-restore-",
+            suffix=".zip",
+            delete=False,
+        ) as temp_file:
+            temp_path = temp_file.name
+
+        # Download is bounded by the same archive limit used by validation.
+        from backup_zip import MAX_ARCHIVE_SIZE
+
+        download_info = await asyncio.to_thread(
+            storage.download_backup_to_file,
+            filename,
+            temp_path,
+            MAX_ARCHIVE_SIZE,
+        )
+
+        if download_info["size"] <= 0:
+            raise HTTPException(
+                status_code=422,
+                detail="ملف النسخة الاحتياطية فارغ.",
+            )
+
+        result = await restore_full_backup(
+            temp_path,
+            admin,
+        )
+
+        # Log only after a successful restore.
+        await log_activity(
+            "restore",
+            "backup",
+            filename,
+            admin,
+        )
+
+        return {
+            "success": True,
+            "message": "تمت استعادة النسخة الاحتياطية بنجاح.",
+            "filename": filename,
+            "restored_collections": result["restored_collections"],
+            "restored_files": result["restored_files"],
+        }
+
+    except HTTPException:
+        raise
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=f"ملف النسخة الاحتياطية غير صالح: {str(exc)}",
+        ) from exc
+
+    except Exception as exc:
+        # Keep technical details in server logs, not in the API response.
+        import logging
+        logging.exception("ZIP backup restore failed: %s", filename)
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "تعذرت استعادة النسخة الاحتياطية. "
+                "تحقق من سجل الخادم لمعرفة التفاصيل."
+            ),
+        ) from exc
+
+    finally:
+        if temp_path and os.path.isfile(temp_path):
+            try:
+                os.remove(temp_path)
+            except OSError:
+                pass
 
 
 # ---------------- Theme ----------------

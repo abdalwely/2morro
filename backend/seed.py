@@ -119,9 +119,18 @@ def _base_doc(doc_id: str, name: str, **extra):
 
 
 async def _seed_admin():
+    # لا تنشئ حساب مدير جديد إذا كان هناك مدير موجود بالفعل.
+    existing_admin = await db.users.find_one({'role': 'admin'})
+
+    if existing_admin is not None:
+        return
+
+    # إنشاء حساب المدير الأول فقط عند عدم وجود أي مدير.
     admin_email = os.environ['ADMIN_EMAIL'].strip().lower()
     admin_password = os.environ['ADMIN_PASSWORD']
+
     existing = await db.users.find_one({'email': admin_email})
+
     if existing is None:
         await db.users.insert_one({
             'email': admin_email,
@@ -131,9 +140,11 @@ async def _seed_admin():
             'active': True,
             'created_at': now_iso(),
         })
-    elif not verify_password(admin_password, existing.get('password_hash', '')):
-        await db.users.update_one({'email': admin_email}, {'$set': {'password_hash': hash_password(admin_password)}})
-
+    else:
+        await db.users.update_one(
+            {'email': admin_email},
+            {'$set': {'role': 'admin'}}
+        )
 
 def _service_docs():
     return [

@@ -133,3 +133,6 @@ android-sdk/
 agenthub/agents/youtube/db
 **/.emergent/recordings/
 backend/downloads/
+# Temporary backup copies
+*.pre-zip-backup
+*.emergent-backup
