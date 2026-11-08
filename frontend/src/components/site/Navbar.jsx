@@ -43,7 +43,7 @@ function Brand({ settings }) {
       )}
       <span className="flex flex-col leading-tight">
         <span className="font-heading text-lg font-extrabold text-white">2Morro</span>
-        <span className="text-[11px] font-medium tracking-wide text-aqua">TECHNICALLY SOLUTIONS</span>
+        <span className="text-[11px] font-medium tracking-wide text-aqua">TECHNOLOGY SOLUTIONS</span>
       </span>
     </Link>
   );

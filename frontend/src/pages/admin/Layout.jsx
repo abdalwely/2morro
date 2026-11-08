@@ -44,7 +44,7 @@ export default function AdminLayout() {
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-electric font-heading text-sm font-black text-white">2M</span>
           <div className="leading-tight">
             <div className="font-heading text-sm font-extrabold text-white">لوحة التحكم</div>
-            <div className="text-[10px] font-medium tracking-wide text-aqua">2MORRO TECHNICALLY SOLUTIONS</div>
+            <div className="text-[10px] font-medium tracking-wide text-aqua">2MORRO TECHNOLOGY SOLUTIONS</div>
           </div>
         </div>
 

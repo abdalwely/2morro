@@ -38,7 +38,7 @@ export default function Footer() {
             )}
             <div className="leading-tight">
               <div className="font-heading text-lg font-extrabold text-white">2Morro</div>
-              <div className="text-[11px] font-medium tracking-wide text-aqua">TECHNICALLY SOLUTIONS</div>
+              <div className="text-[11px] font-medium tracking-wide text-aqua">TECHNOLOGY SOLUTIONS</div>
             </div>
           </div>
           <p className="mt-4 text-sm leading-relaxed text-slate-400">{tr(settings, "footer_text") || ""}</p>
