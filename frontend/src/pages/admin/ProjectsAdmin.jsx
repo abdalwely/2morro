@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2, Eye, ArrowUp, ArrowDown, Boxes, ExternalLink } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import api from "@/lib/api";
 import { useCrud } from "./crud";
 import { Field, inputCls, ImageUploader, GalleryManager, DynamicList, ConfirmDelete, EnglishFields } from "@/components/admin/AdminUI";
@@ -12,13 +11,18 @@ import { LoadingBlock, EmptyState, SafeImage } from "@/components/site/Shared";
 const EMPTY = {
   en: {},
   name: "", short_desc: "", detailed_desc: "", main_image_url: "", gallery_urls: [],
-  category: "", technologies: [], goals: "", outputs: "", external_url: "",
-  service_id: "", order: 0, published: false,
+  category: "", category_id: "", technologies: [], technology_ids: [], service_ids: [], solution_ids: [], sector_ids: [], delivery_model_ids: [], goals: "", outputs: "", external_url: "",
+  service_id: "", order: 0, published: false, seo_title: "", seo_description: "",
 };
 
 export default function ProjectsAdmin() {
   const { items, loading, save, remove, setOrder, togglePublish } = useCrud("projects");
-  const { data: services } = useQuery({ queryKey: ["admin-services"], queryFn: () => api.get("/admin/services").then((r) => r.data) });
+  const { data: services = [] } = useQuery({ queryKey: ["admin-services"], queryFn: () => api.get("/admin/services").then((r) => r.data) });
+  const { data: solutions = [] } = useQuery({ queryKey: ["admin-solutions"], queryFn: () => api.get("/admin/solutions").then(r => r.data) });
+  const { data: sectors = [] } = useQuery({ queryKey: ["admin-sectors"], queryFn: () => api.get("/admin/sectors").then(r => r.data) });
+  const { data: categories = [] } = useQuery({ queryKey: ["admin-project-categories"], queryFn: () => api.get("/admin/project_categories").then(r => r.data) });
+  const { data: technologies = [] } = useQuery({ queryKey: ["admin-technologies"], queryFn: () => api.get("/admin/technologies").then(r => r.data) });
+  const { data: deliveryModels = [] } = useQuery({ queryKey: ["admin-delivery-models"], queryFn: () => api.get("/admin/delivery_models").then(r => r.data) });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY);
@@ -33,9 +37,10 @@ export default function ProjectsAdmin() {
   const openEdit = (item) => {
     setEditing(item);
     setForm({
+      en: item.en || {}, seo_title: item.seo_title || "", seo_description: item.seo_description || "",
       name: item.name || "", short_desc: item.short_desc || "", detailed_desc: item.detailed_desc || "",
       main_image_url: item.main_image_url || "", gallery_urls: item.gallery_urls || [],
-      category: item.category || "", technologies: item.technologies || [], goals: item.goals || "",
+      category: item.category || "", category_id: item.category_id || "", technologies: item.technologies || [], technology_ids: item.technology_ids || [], service_ids: item.service_ids || (item.service_id ? [item.service_id] : []), solution_ids: item.solution_ids || [], sector_ids: item.sector_ids || [], delivery_model_ids: item.delivery_model_ids || [], goals: item.goals || "",
       outputs: item.outputs || "", external_url: item.external_url || "", service_id: item.service_id || "",
       order: item.order || 0, published: Boolean(item.published),
     });
@@ -142,8 +147,10 @@ export default function ProjectsAdmin() {
               <Field label="اسم المشروع *">
                 <input className={inputCls} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required minLength={2} data-testid="admin-project-form-name" />
               </Field>
-              <Field label="التصنيف">
-                <input className={inputCls} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="مثال: أنظمة مخصصة" data-testid="admin-project-form-category" />
+              <Field label="تصنيف المشروع">
+                <select className={inputCls} value={form.category_id} onChange={(e) => setForm({ ...form, category_id: e.target.value })}>
+                  <option value="">بدون تصنيف معتمد</option>{categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
               </Field>
             </div>
             <Field label="الوصف المختصر *">
@@ -152,25 +159,27 @@ export default function ProjectsAdmin() {
             <Field label="الوصف التفصيلي">
               <textarea className={`${inputCls} min-h-[120px]`} value={form.detailed_desc} onChange={(e) => setForm({ ...form, detailed_desc: e.target.value })} data-testid="admin-project-form-detailed-desc" />
             </Field>
-            <EnglishFields form={form} setForm={setForm} testid="admin-project-form" fields={[{ key: "name", label: "Project name" }, { key: "category", label: "Category" }, { key: "short_desc", label: "Short description", type: "textarea" }, { key: "detailed_desc", label: "Detailed description", type: "textarea" }, { key: "goals", label: "Goals", type: "textarea" }, { key: "outputs", label: "Outputs", type: "textarea" }]} />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="عنوان SEO"><input className={inputCls} value={form.seo_title || ""} onChange={e => setForm({ ...form, seo_title: e.target.value })} /></Field>
+              <Field label="وصف SEO"><textarea className={inputCls} value={form.seo_description || ""} onChange={e => setForm({ ...form, seo_description: e.target.value })} /></Field>
+            </div>
+            <EnglishFields form={form} setForm={setForm} testid="admin-project-form" fields={[{ key: "name", label: "Project name" }, { key: "category", label: "Category" }, { key: "short_desc", label: "Short description", type: "textarea" }, { key: "detailed_desc", label: "Detailed description", type: "textarea" }, { key: "goals", label: "Goals", type: "textarea" }, { key: "outputs", label: "Outputs", type: "textarea" }, { key: "seo_title", label: "SEO title" }, { key: "seo_description", label: "SEO description", type: "textarea" }]} />
             <ImageUploader value={form.main_image_url} onChange={(u) => setForm({ ...form, main_image_url: u })} label="الصورة الرئيسية" testid="admin-project-form-image" />
             <GalleryManager urls={form.gallery_urls} onChange={(g) => setForm({ ...form, gallery_urls: g })} />
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="الخدمة المرتبطة">
-                <Select dir="rtl" value={form.service_id || "none"} onValueChange={(v) => setForm({ ...form, service_id: v === "none" ? "" : v })}>
-                  <SelectTrigger className="h-11" data-testid="admin-project-form-service"><SelectValue /></SelectTrigger>
-                  <SelectContent className="max-h-72">
-                    <SelectItem value="none">بدون ربط</SelectItem>
-                    {(services || []).map((s) => (
-                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-              <Field label="ترتيب الظهور">
-                <input type="number" min="0" className={inputCls} value={form.order} onChange={(e) => setForm({ ...form, order: Number(e.target.value) })} data-testid="admin-project-form-order" />
-              </Field>
-            </div>
+            <Field label="ترتيب الظهور">
+              <input type="number" min="0" className={inputCls} value={form.order} onChange={(e) => setForm({ ...form, order: Number(e.target.value) })} data-testid="admin-project-form-order" />
+            </Field>
+            {[
+              ["الخدمات المرتبطة", "service_ids", services],
+              ["الحلول المرتبطة", "solution_ids", solutions],
+              ["القطاعات المرتبطة", "sector_ids", sectors],
+              ["التقنيات المرتبطة", "technology_ids", technologies],
+              ["نماذج التنفيذ المرتبطة (اختياري)", "delivery_model_ids", deliveryModels],
+            ].map(([label, key, options]) => <Field key={key} label={label}>
+              <div className="grid gap-2 rounded-xl border border-slate-200 p-3 sm:grid-cols-2">
+                {options.length === 0 ? <span className="text-xs text-slate-500">لا توجد عناصر متاحة بعد.</span> : options.map(option => <label key={option.id} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form[key].includes(option.id)} onChange={e => setForm({ ...form, [key]: e.target.checked ? [...form[key], option.id] : form[key].filter(id => id !== option.id) })} />{option.name}</label>)}
+              </div>
+            </Field>)}
             <Field label="التقنيات المستخدمة">
               <DynamicList items={form.technologies} onChange={(t) => setForm({ ...form, technologies: t })} placeholder="مثال: React" testid="admin-project-form-tech" />
             </Field>

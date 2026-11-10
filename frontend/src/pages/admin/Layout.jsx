@@ -1,13 +1,21 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Briefcase, Boxes, Settings, LogOut, ExternalLink, Menu, X, Route, Users, Palette, DatabaseBackup } from "lucide-react";
+import { LayoutDashboard, Briefcase, Boxes, Settings, LogOut, ExternalLink, Menu, X, Route, Users, Palette, DatabaseBackup, Layers, Lightbulb, Building2, Cpu, BookOpen, Workflow, Tags } from "lucide-react";
 import { useAdminAuth } from "@/context/AdminAuthContext";
+import { useSEO } from "@/hooks/useSEO";
 
 const NAV = [
   { to: "/admin", label: "الرئيسية", icon: LayoutDashboard, end: true, testid: "admin-nav-dashboard" },
   { to: "/admin/services", label: "إدارة الخدمات", icon: Briefcase, testid: "admin-nav-services" },
   { to: "/admin/projects", label: "إدارة المشاريع", icon: Boxes, testid: "admin-nav-projects" },
+  { to: "/admin/domains", label: "المجالات التقنية", icon: Layers, testid: "admin-nav-domains" },
+  { to: "/admin/solutions", label: "الحلول المتكاملة", icon: Lightbulb, testid: "admin-nav-solutions" },
+  { to: "/admin/sectors", label: "القطاعات", icon: Building2, testid: "admin-nav-sectors" },
+  { to: "/admin/project-categories", label: "تصنيفات المشاريع", icon: Tags, testid: "admin-nav-project-categories" },
+  { to: "/admin/technologies", label: "المنظومة التقنية", icon: Cpu, testid: "admin-nav-technologies" },
+  { to: "/admin/methodology", label: "منهجية العمل", icon: Workflow, testid: "admin-nav-methodology" },
   { to: "/admin/models", label: "نماذج التنفيذ", icon: Route, testid: "admin-nav-models" },
+  { to: "/admin/articles", label: "مركز المعرفة", icon: BookOpen, testid: "admin-nav-articles" },
   { to: "/admin/settings", label: "بيانات الشركة والنصوص", icon: Settings, testid: "admin-nav-settings" },
   { to: "/admin/appearance", label: "المظهر والألوان", icon: Palette, testid: "admin-nav-appearance", adminOnly: true },
   { to: "/admin/users", label: "المستخدمون", icon: Users, testid: "admin-nav-users", adminOnly: true },
@@ -19,6 +27,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
+  useSEO({ title: "لوحة التحكم | 2Morro Technology Solutions", description: "منطقة إدارة محتوى الموقع وإعداداته.", robots: "noindex,nofollow" });
 
   useEffect(() => setOpen(false), [pathname]);
 

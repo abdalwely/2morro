@@ -29,7 +29,7 @@ manage_router = APIRouter(prefix='/api/admin')
 
 EMAIL_RE = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
 BACKUP_PARTS = {
-    'content': ['services', 'projects', 'delivery_models', 'files'],
+    'content': ['domains', 'services', 'solutions', 'sectors', 'projects', 'project_categories', 'technologies', 'methodology_phases', 'delivery_models', 'articles', 'article_categories', 'files'],
     'users': ['users'],
     'settings': ['settings'],
     'activity': ['activity'],

@@ -4,6 +4,11 @@ from db import db, now_iso, slugify
 from security import hash_password, verify_password
 from defaults import default_pages, default_theme
 from seed_en import SETTINGS_EN, SERVICES_EN, PROJECTS_EN, MODELS_EN, service_en, project_en, model_en
+from profile_demo_content import (DOMAINS as PROFILE_DOMAINS, PROFILE_SERVICES, SOLUTIONS as PROFILE_SOLUTIONS,
+    SECTORS as PROFILE_SECTORS, PROJECT_CATEGORIES as PROFILE_PROJECT_CATEGORIES,
+    TECHNOLOGIES as PROFILE_TECHNOLOGIES, ARTICLE_CATEGORIES as PROFILE_ARTICLE_CATEGORIES,
+    ARTICLES as PROFILE_ARTICLES, DEMO_PROJECTS as PROFILE_DEMO_PROJECTS,
+    DELIVERY_MODELS as PROFILE_DELIVERY_MODELS)
 
 IMG_OFFICE1 = 'https://images.unsplash.com/photo-1629904853893-c2c8981a1dc5?auto=format&fit=crop&w=1200&q=80'
 IMG_OFFICE2 = 'https://images.unsplash.com/photo-1606857521015-7f9fcf423740?auto=format&fit=crop&w=1200&q=80'
@@ -21,30 +26,51 @@ IMG_DESIGN1 = 'https://images.unsplash.com/photo-1580894899378-92e56886cd4d?auto
 def default_settings():
     return {
         '_id': 'settings',
-        'company_name': '2Morro Technically Solutions',
-        'tagline': 'حلول تقنية متكاملة بأعلى معايير الجودة',
-        'hero_title': 'نبني حلولاً تقنية تدفع أعمالك إلى الأمام',
-        'hero_subtitle': '2Morro Technically Solutions شركة متخصصة في تصميم وتطوير الحلول التقنية المتكاملة، من المواقع والأنظمة المخصصة إلى التحول الرقمي والدعم المُدار، بمنهجية واضحة وجودة ملتزمة بها في كل مرحلة.',
-        'about_short': 'شركة تقنية متخصصة في تصميم وتطوير الحلول الرقمية المتكاملة للأعمال.',
-        'about_content': '2Morro Technically Solutions شركة متخصصة في تقديم الحلول التقنية المتكاملة، تعمل مع الشركات والمؤسسات على تصميم وتطوير الأنظمة والمواقع والتطبيقات التي تلبي احتياجات أعمالها الفعلية.\n\nنجمع بين الفهم العميق لطبيعة عمل العميل والخبرة التقنية اللازمة لبناء حلول عملية وقابلة للتوسع، بدءًا من تحليل المتطلبات وتصميم الحل، مرورًا بالتطوير والاختبار، وصولًا إلى النشر والدعم المستمر.\n\nنؤمن بأن نجاح أي مشروع تقني يبدأ من الوضوح: وضوح في الأهداف، ووضوح في المنهجية، ووضوح في التواصل. لذلك نتبع أسلوب عمل منظمًا يجعل كل مرحلة من مراحل المشروع واضحة للعميل، ويضمن تسليم النتائج بالمعايير المتفق عليها.',
-        'mission': 'تمكين الشركات من الاستفادة من التقنية بفعالية، من خلال حلول رقمية عملية مبنية على فهم حقيقي لاحتياجات الأعمال وتُنفَّذ بأعلى معايير الجودة.',
-        'vision': 'أن نكون شريكًا تقنيًا موثوقًا يُعتمد عليه في بناء الحلول الرقمية وتطويرها على المدى الطويل.',
-        'values': [
-            'الاحترافية في التعامل والتنفيذ',
-            'الشفافية والوضوح في كل مرحلة من مراحل المشروع',
-            'الالتزام بالجودة والمواعيد',
-            'التحسين المستمر ومواكبة التطور التقني',
-            'التركيز على القيمة الفعلية للعميل',
-        ],
-        'quality_content': 'نطبق في كل مشروع منهجية واضحة تشمل تحليل المتطلبات بدقة، والتنفيذ على مراحل قابلة للمراجعة، واختبارات شاملة قبل التسليم. ولا يُعتبر المشروع مكتملاً إلا بعد التحقق من مطابقة المخرجات للمواصفات المتفق عليها، وتقديم الدعم اللازم بعد التشغيل.',
-        'methodology_content': 'نعتمد أسلوب عمل مرحليًا واضحًا يبدأ من فهم المتطلبات وينتهي بالتشغيل والدعم، مع إشراك العميل في نقاط المراجعة الرئيسية لضمان أن الحل المطروح يلبي التوقعات فعليًا.',
-        'email': '',
-        'whatsapp_number': '',
+        'company_name': '2Morro Technology Solutions',
+        'founding_date': '2011-01-01',
+        'address': 'سيئون، حضرموت، اليمن',
+        'phone': '+967 5400999',
+        'website': 'https://www.2morroTS.com',
+        'company_profile_pdf_url': '',
+        'business_hours': {
+            'configured': False,
+            'timezone': 'Asia/Aden',
+            'days': [
+                {'day': 'sunday', 'label_ar': 'الأحد', 'label_en': 'Sunday', 'enabled': False, 'open': '', 'close': ''},
+                {'day': 'monday', 'label_ar': 'الإثنين', 'label_en': 'Monday', 'enabled': False, 'open': '', 'close': ''},
+                {'day': 'tuesday', 'label_ar': 'الثلاثاء', 'label_en': 'Tuesday', 'enabled': False, 'open': '', 'close': ''},
+                {'day': 'wednesday', 'label_ar': 'الأربعاء', 'label_en': 'Wednesday', 'enabled': False, 'open': '', 'close': ''},
+                {'day': 'thursday', 'label_ar': 'الخميس', 'label_en': 'Thursday', 'enabled': False, 'open': '', 'close': ''},
+                {'day': 'friday', 'label_ar': 'الجمعة', 'label_en': 'Friday', 'enabled': False, 'open': '', 'close': ''},
+                {'day': 'saturday', 'label_ar': 'السبت', 'label_en': 'Saturday', 'enabled': False, 'open': '', 'close': ''},
+            ],
+        },
+        'company_profile': {
+            'name': '2Morro Technology Solutions', 'founding_date': '2011-01-01',
+            'headquarters': 'سيئون، حضرموت، اليمن', 'tagline_en': 'Connecting Tomorrow',
+            'tagline_ar': 'تمكين التحول الرقمي',
+        },
+        'homepage': {'sections': ['hero', 'about', 'domains', 'services', 'solutions', 'sectors', 'projects', 'technology', 'methodology', 'why', 'quality', 'knowledge', 'cta'], 'visible': {}},
+        'seo': {'default_title': '2Morro Technology Solutions', 'default_description': '', 'og_image_url': ''},
+        'privacy_policy': {'ar': '', 'en': ''},
+        'terms': {'ar': '', 'en': ''},
+        'tagline': 'Connecting Tomorrow | Empowering Digital Transformation',
+        'hero_title': 'نربط المستقبل بحلول تقنية متكاملة.',
+        'hero_subtitle': 'من شبكات الألياف الضوئية والاتصالات إلى مراكز البيانات والأمن السيبراني والأنظمة الذكية، نصمم وننفذ وندعم حلولًا تقنية متكاملة تتلاءم مع احتياجات المؤسسات والقطاعات الحيوية.',
+        'about_short': 'شركة تقنية تأسست في سيئون، حضرموت عام 2011، وتعمل في هندسة الاتصالات وتكامل أنظمة تقنية المعلومات والحلول الأمنية والبرمجيات الحديثة.',
+        'about_content': '2Morro Technology Solutions شركة تقنية تأسست في سيئون، حضرموت عام 2011، وتركز على بناء بنية اتصالات وبنية رقمية موثوقة للمؤسسات ذات الاحتياجات التشغيلية المهمة.\n\nتجمع الشركة بين هندسة الاتصالات وتكامل أنظمة تقنية المعلومات والحلول الأمنية والبرمجيات الحديثة، وتقدم خدمات تشمل الدراسة والتصميم والتنفيذ والتشغيل والدعم الفني بحسب نطاق كل مشروع.\n\nتستند هذه النبذة إلى الملف التعريفي للشركة لعام 2026، وتُعرض المعلومات التفصيلية للخدمات والمجالات في أقسام الموقع.',
+        'mission': 'تصميم وتنفيذ ودعم أنظمة الاتصالات وتقنية المعلومات بما يحسن الكفاءة التشغيلية والأمن والاتصال واستمرارية الأعمال.',
+        'vision': 'أن نكون شريكًا تقنيًا إقليميًا موثوقًا يربط الأفراد والمؤسسات والبنية التحتية من خلال حلول رقمية يعتمد عليها.',
+        'values': ['الموثوقية', 'الابتكار', 'النزاهة', 'الشراكة'],
+        'quality_content': 'يرتكز تقديم الخدمات على وضوح النطاق والمواصفات، والفحص والتوثيق والتسليم وفق متطلبات كل مشروع. وتُحدد إجراءات القبول والدعم ومؤشرات الأداء ضمن الاتفاق الخاص بالمشروع.',
+        'methodology_content': 'تبدأ رحلة العمل بفهم المتطلبات والمسح والتقييم، ثم التصميم والتخطيط، فالتنفيذ والتكامل، والفحص والتسليم، ثم التشغيل والدعم وفق نطاق المشروع.',
+        'email': '2morroTS@gmail.com',
+        'whatsapp_number': '967782009690',
         'social': {'linkedin': '', 'twitter': '', 'instagram': '', 'github': ''},
         'footer_text': 'شريكك التقني لتصميم وتطوير الحلول الرقمية المتكاملة.',
         'logo_url': '',
-        'seo_title': '2Morro Technically Solutions | حلول تقنية متكاملة',
-        'seo_description': '2Morro Technically Solutions شركة متخصصة في تصميم وتطوير الحلول التقنية المتكاملة: تطوير المواقع والأنظمة، التطبيقات، الحلول السحابية، الأمن السيبراني، والدعم المُدار.',
+        'seo_title': '2Morro Technology Solutions | حلول تقنية متكاملة',
+        'seo_description': '2Morro Technology Solutions شركة متخصصة في تصميم وتطوير الحلول التقنية المتكاملة: تطوير المواقع والأنظمة، التطبيقات، الحلول السحابية، الأمن السيبراني، والدعم المُدار.',
     }
 
 
@@ -118,6 +144,155 @@ def _base_doc(doc_id: str, name: str, **extra):
     return doc
 
 
+async def _seed_profile_records():
+    """Insert the supplied 2026 company-profile content and labelled demo samples.
+
+    Uses stable IDs and $setOnInsert only: existing records and admin edits are
+    never replaced. Legacy generic demo cards are retained but hidden from the
+    public site so they do not masquerade as company-profile services/projects.
+    """
+    sets = (
+        ('domains', PROFILE_DOMAINS, False),
+        ('services', PROFILE_SERVICES, False),
+        ('delivery_models', PROFILE_DELIVERY_MODELS, False),
+        ('solutions', PROFILE_SOLUTIONS, False),
+        ('sectors', PROFILE_SECTORS, False),
+        ('project_categories', PROFILE_PROJECT_CATEGORIES, False),
+        ('technologies', PROFILE_TECHNOLOGIES, False),
+        ('article_categories', PROFILE_ARTICLE_CATEGORIES, False),
+        ('articles', PROFILE_ARTICLES, True),
+        ('projects', PROFILE_DEMO_PROJECTS, True),
+    )
+    for collection, records, is_demo in sets:
+        for source in records:
+            doc = dict(source)
+            doc.setdefault('is_demo', is_demo)
+            if collection == 'services':
+                domain_en = {
+                    'profile-domain-01': 'Telecommunications & Networks',
+                    'profile-domain-02': 'Digital Infrastructure & Cloud',
+                    'profile-domain-03': 'Cybersecurity & Security Systems',
+                    'profile-domain-04': 'Software & Enterprise Solutions',
+                    'profile-domain-05': 'Smart Solutions & IoT',
+                    'profile-domain-06': 'Engineering Consulting & Integration',
+                }
+                doc.setdefault('en', {})
+                doc['en'].setdefault('category', domain_en.get(doc.get('domain_id'), ''))
+            if collection == 'projects':
+                project_category_en = {
+                    'نشر شبكات الاتصالات': 'Telecom Network Deployment',
+                    'شبكات الألياف الضوئية الرئيسية': 'Fiber Optic Backbone Projects',
+                    'البنية التقنية الحكومية': 'Government ICT Infrastructure',
+                    'اتصالات قطاع النفط والغاز': 'Oil & Gas Telecommunications Systems',
+                    'تنفيذ مراكز البيانات': 'Data Center Implementation',
+                    'تكامل المراقبة والأنظمة الأمنية': 'CCTV & Security Integration',
+                }
+                doc.setdefault('en', {})
+                doc['en'].setdefault('category', project_category_en.get(doc.get('category'), doc.get('category', '')))
+            if collection == 'technologies':
+                category_en = {
+                    'Networking': 'Networking', 'Telecommunications': 'Telecommunications',
+                    'Enterprise & Cloud': 'Enterprise & Cloud', 'Cloud': 'Cloud',
+                    'Operating Systems': 'Operating Systems', 'Security Systems': 'Security Systems',
+                    'Software Development': 'Software Development', 'Mobile Development': 'Mobile Development', 'IoT': 'Internet of Things',
+                }
+                doc.setdefault('en', {})
+                doc['en'].setdefault('category', category_en.get(doc.get('category'), doc.get('category', '')))
+            title = doc.get('name') or doc.get('title') or ''
+            summary = doc.get('short_desc') or doc.get('summary') or doc.get('description') or ''
+            doc.setdefault('seo_title', f"{title} | 2Morro Technology Solutions" if title else '')
+            doc.setdefault('seo_description', summary[:300])
+            doc.setdefault('en', {})
+            en_title = doc['en'].get('name') or doc['en'].get('title') or title
+            en_summary = doc['en'].get('short_desc') or doc['en'].get('summary') or doc['en'].get('description') or summary
+            doc['en'].setdefault('seo_title', f"{en_title} | 2Morro Technology Solutions" if en_title else '')
+            doc['en'].setdefault('seo_description', en_summary[:300])
+            doc.setdefault('content_origin', 'illustrative_demo' if is_demo else 'corporate_profile_2026')
+            doc.setdefault('created_at', now_iso())
+            doc.setdefault('updated_at', now_iso())
+            await db[collection].update_one(
+                {'_id': doc['_id']},
+                {'$setOnInsert': doc},
+                upsert=True,
+            )
+
+    # Keep the older generic demo seed records for reference in the dashboard,
+    # but hide them from public listings now that the company-profile content exists.
+    await db.services.update_many(
+        {'_id': {'$regex': '^svc-[0-9]+$'}, 'is_demo': True, 'superseded_by_profile_content': {'$ne': True}},
+        {'$set': {'published': False, 'superseded_by_profile_content': True}},
+    )
+    await db.projects.update_many(
+        {'_id': {'$regex': '^prj-[0-9]+$'}, 'is_demo': True, 'superseded_by_profile_content': {'$ne': True}},
+        {'$set': {'published': False, 'superseded_by_profile_content': True}},
+    )
+
+    # Fill English company-profile text only when the current value is still the
+    # old generic starter copy; preserve any text already customized by an admin.
+    settings = await db.settings.find_one({'_id': 'settings'})
+    if settings:
+        old_about = 'شركة تقنية متخصصة في تصميم وتطوير الحلول الرقمية المتكاملة للأعمال.'
+        profile_updates = {}
+        old_about_content = '2Morro Technology Solutions شركة متخصصة في تقديم الحلول التقنية المتكاملة، تعمل مع الشركات والمؤسسات على تصميم وتطوير الأنظمة والمواقع والتطبيقات التي تلبي احتياجات أعمالها الفعلية.\n\nنجمع بين الفهم العميق لطبيعة عمل العميل والخبرة التقنية اللازمة لبناء حلول عملية وقابلة للتوسع، بدءًا من تحليل المتطلبات وتصميم الحل، مرورًا بالتطوير والاختبار، وصولًا إلى النشر والدعم المستمر.\n\nنؤمن بأن نجاح أي مشروع تقني يبدأ من الوضوح: وضوح في الأهداف، ووضوح في المنهجية، ووضوح في التواصل. لذلك نتبع أسلوب عمل منظمًا يجعل كل مرحلة من مراحل المشروع واضحة للعميل، ويضمن تسليم النتائج بالمعايير المتفق عليها.'
+        profile_copy = {
+            'tagline': ('حلول تقنية متكاملة بأعلى معايير الجودة', 'Connecting Tomorrow | Empowering Digital Transformation'),
+            'hero_title': ('نبني حلولاً تقنية تدفع أعمالك إلى الأمام', 'نربط المستقبل بحلول تقنية متكاملة.'),
+            'hero_subtitle': ('2Morro Technology Solutions شركة متخصصة في تصميم وتطوير الحلول التقنية المتكاملة، من المواقع والأنظمة المخصصة إلى التحول الرقمي والدعم المُدار، بمنهجية واضحة وجودة ملتزمة بها في كل مرحلة.', 'من شبكات الألياف الضوئية والاتصالات إلى مراكز البيانات والأمن السيبراني والأنظمة الذكية، نصمم وننفذ وندعم حلولًا تقنية متكاملة تتلاءم مع احتياجات المؤسسات والقطاعات الحيوية.'),
+            'about_short': (old_about, 'شركة تقنية تأسست في سيئون، حضرموت عام 2011، وتعمل في هندسة الاتصالات وتكامل أنظمة تقنية المعلومات والحلول الأمنية والبرمجيات الحديثة.'),
+            'about_content': (old_about_content, '2Morro Technology Solutions شركة تقنية تأسست في سيئون، حضرموت عام 2011، وتركز على بناء بنية اتصالات وبنية رقمية موثوقة للمؤسسات ذات الاحتياجات التشغيلية المهمة.\n\nتجمع الشركة بين هندسة الاتصالات وتكامل أنظمة تقنية المعلومات والحلول الأمنية والبرمجيات الحديثة، وتقدم خدمات تشمل الدراسة والتصميم والتنفيذ والتشغيل والدعم الفني بحسب نطاق كل مشروع.\n\nتستند هذه النبذة إلى الملف التعريفي للشركة لعام 2026، وتُعرض المعلومات التفصيلية للخدمات والمجالات في أقسام الموقع.'),
+            'mission': ('تمكين الشركات من الاستفادة من التقنية بفعالية، من خلال حلول رقمية عملية مبنية على فهم حقيقي لاحتياجات الأعمال وتُنفَّذ بأعلى معايير الجودة.', 'تصميم وتنفيذ ودعم أنظمة الاتصالات وتقنية المعلومات بما يحسن الكفاءة التشغيلية والأمن والاتصال واستمرارية الأعمال.'),
+            'vision': ('أن نكون شريكًا تقنيًا موثوقًا يُعتمد عليه في بناء الحلول الرقمية وتطويرها على المدى الطويل.', 'أن نكون شريكًا تقنيًا إقليميًا موثوقًا يربط الأفراد والمؤسسات والبنية التحتية من خلال حلول رقمية يعتمد عليها.'),
+            'quality_content': ('نطبق في كل مشروع منهجية واضحة تشمل تحليل المتطلبات بدقة، والتنفيذ على مراحل قابلة للمراجعة، واختبارات شاملة قبل التسليم. ولا يُعتبر المشروع مكتملاً إلا بعد التحقق من مطابقة المخرجات للمواصفات المتفق عليها، وتقديم الدعم اللازم بعد التشغيل.', 'يرتكز تقديم الخدمات على وضوح النطاق والمواصفات، والفحص والتوثيق والتسليم وفق متطلبات كل مشروع. وتُحدد إجراءات القبول والدعم ومؤشرات الأداء ضمن الاتفاق الخاص بالمشروع.'),
+            'methodology_content': ('نعتمد أسلوب عمل مرحليًا واضحًا يبدأ من فهم المتطلبات وينتهي بالتشغيل والدعم، مع إشراك العميل في نقاط المراجعة الرئيسية لضمان أن الحل المطروح يلبي التوقعات فعليًا.', 'تبدأ رحلة العمل بفهم المتطلبات والمسح والتقييم، ثم التصميم والتخطيط، فالتنفيذ والتكامل، والفحص والتسليم، ثم التشغيل والدعم وفق نطاق المشروع.'),
+            'footer_text': ('شريكك التقني لتصميم وتطوير الحلول الرقمية المتكاملة.', 'Connecting Tomorrow | Empowering Digital Transformation.'),
+        }
+        for key, (old_value, new_value) in profile_copy.items():
+            if settings.get(key) in ('', old_value):
+                profile_updates[key] = new_value
+        old_values = ['الاحترافية في التعامل والتنفيذ', 'الشفافية والوضوح في كل مرحلة من مراحل المشروع', 'الالتزام بالجودة والمواعيد', 'التحسين المستمر ومواكبة التطور التقني', 'التركيز على القيمة الفعلية للعميل']
+        if settings.get('values') == old_values:
+            profile_updates['values'] = ['الموثوقية', 'الابتكار', 'النزاهة', 'الشراكة']
+        if settings.get('company_profile', {}).get('headquarters') in (None, ''):
+            profile_updates['company_profile.headquarters'] = 'سيئون، حضرموت، اليمن'
+        if settings.get('company_profile', {}).get('founding_date') in (None, ''):
+            profile_updates['company_profile.founding_date'] = '2011-01-01'
+        if settings.get('company_profile', {}).get('tagline_en') in (None, ''):
+            profile_updates['company_profile.tagline_en'] = 'Connecting Tomorrow / Empowering Digital Transformation'
+        # Replace the old starter English profile only when it is still unchanged.
+        old_en_about = 'A technology company specialized in designing and developing integrated digital solutions for businesses.'
+        if settings.get('en', {}).get('about_short') == old_en_about:
+            for key, value in SETTINGS_EN.items():
+                profile_updates[f'en.{key}'] = value
+        if profile_updates:
+            await db.settings.update_one({'_id': 'settings'}, {'$set': profile_updates})
+
+    # Enrich the five already-seeded methodology records without overwriting any
+    # administrator-authored activities or outputs.
+    methodology_details = [
+        ('مسح الاحتياجات وجمع المعلومات وتحديد الأهداف والنطاق والأولويات.', [('جلسات استكشاف','مناقشة أهداف المشروع والعمليات الحالية.'),('تحليل المتطلبات','توثيق المتطلبات الوظيفية والتقنية.'),('اعتماد النطاق','مراجعة النطاق والأولويات مع العميل.')], ['ملخص المتطلبات','نطاق أولي للمشروع']),
+        ('إعداد التصور الفني والمخططات والمواصفات وخطة التنفيذ.', [('التصور الفني','تحديد البدائل والمكونات المناسبة.'),('التصميم','إعداد المخططات والتصاميم.'),('التخطيط','تحديد الموارد والجدول والمخاطر.')], ['تصميم فني','مواصفات وخطة تنفيذ']),
+        ('تنفيذ المكونات وتجهيزها وربط الأنظمة والخدمات ذات العلاقة.', [('التجهيز','تهيئة المكونات والمواد.'),('التنفيذ','التركيب والتطوير والتهيئة.'),('التكامل','ربط المكونات والأنظمة.')], ['مكونات منفذة حسب النطاق','توثيق التكامل']),
+        ('إجراء الفحوص والتحقق من مطابقة المخرجات وتوثيق التسليم.', [('الاختبارات','تنفيذ فحوص القبول المناسبة.'),('معالجة الملاحظات','تسجيل الملاحظات وإغلاقها.'),('التسليم','إعداد الوثائق ومحاضر القبول.')], ['نتائج الاختبارات','وثائق التسليم']),
+        ('إطلاق الحل ومتابعة تشغيله وتقديم الدعم وفق الاتفاق.', [('التشغيل','بدء التشغيل والتحقق من الجاهزية.'),('المتابعة','متابعة الأداء والحالة التشغيلية.'),('الدعم','تقديم الدعم والصيانة حسب الاتفاق.')], ['إجراءات تشغيل','خطة دعم حسب الاتفاق']),
+    ]
+    async for phase in db.methodology_phases.find({'_id': {'$regex': '^arch-methodology_phases-[0-9]+$'}}):
+        try:
+            idx = int(str(phase['_id']).rsplit('-', 1)[-1]) - 1
+        except ValueError:
+            continue
+        if 0 <= idx < len(methodology_details):
+            detail, activities, outputs = methodology_details[idx]
+            updates = {}
+            if not phase.get('detailed_desc'):
+                updates['detailed_desc'] = detail
+            if not phase.get('activities'):
+                updates['activities'] = [{'title': title, 'desc': desc} for title, desc in activities]
+            if not phase.get('outputs'):
+                updates['outputs'] = outputs
+            if updates:
+                await db.methodology_phases.update_one({'_id': phase['_id']}, {'$set': updates})
+
+
 async def _seed_admin():
     # لا تنشئ حساب مدير جديد إذا كان هناك مدير موجود بالفعل.
     existing_admin = await db.users.find_one({'role': 'admin'})
@@ -155,13 +330,17 @@ def _service_docs():
     ]
 
 
-async def _project_docs():
-    svc_ids = [d['_id'] for d in await db.services.find({}, {'_id': 1}).to_list(60)]
+def _project_docs():
+    # Demo projects must not be linked to services by array position or modulo.
+    # Relationships are added only after a human confirms the actual project scope.
     docs = []
-    for idx, p in enumerate(PROJECTS, start=1):
-        fields = {k: v for k, v in p.items() if k != 'name'}
-        fields['service_id'] = svc_ids[idx % len(svc_ids)] if svc_ids else ''
-        docs.append(_base_doc(f'prj-{idx:02d}', p['name'], **fields))
+    for idx, project in enumerate(PROJECTS, start=1):
+        fields = {key: value for key, value in project.items() if key != 'name'}
+        fields.setdefault('service_ids', [])
+        fields.setdefault('solution_ids', [])
+        fields.setdefault('sector_ids', [])
+        fields.setdefault('technology_ids', [])
+        docs.append(_base_doc(f'prj-{idx:02d}', project['name'], **fields))
     return docs
 
 
@@ -218,15 +397,100 @@ async def _seed_collection(name: str, build):
         )
 
 
+async def _migrate_legacy_delivery_steps():
+    """Move built-in step-like delivery records into methodology drafts without deleting history."""
+    async for old in db.delivery_models.find({'_id': {'$regex': '^mdl-'}, 'is_demo': True, 'archived_as_methodology': {'$ne': True}}):
+        new_id = f"migrated-{old['_id']}"
+        await db.methodology_phases.update_one({'_id': new_id}, {'$setOnInsert': {
+            'name': old.get('name', 'مرحلة عمل'),
+            'short_desc': old.get('short_desc', ''),
+            'detailed_desc': old.get('detailed_desc', ''),
+            'activities': old.get('phases', []) or [],
+            'outputs': old.get('outputs', []) or [],
+            'image_url': old.get('image_url', ''),
+            'order': 100 + int(str(old['_id']).split('-')[-1]) if str(old['_id']).split('-')[-1].isdigit() else 100,
+            'published': False,
+            'is_demo': True,
+            'legacy_source_id': old['_id'],
+            'slug': old.get('slug', slugify(old.get('name', 'مرحلة عمل'), new_id)),
+            'en': old.get('en', {}),
+            'created_at': old.get('created_at', now_iso()),
+            'updated_at': now_iso(),
+        }}, upsert=True)
+        await db.delivery_models.update_one({'_id': old['_id']}, {'$set': {
+            'published': False, 'archived_as_methodology': True, 'updated_at': now_iso(),
+        }})
+
+
 async def run_seed():
     await db.users.create_index('email', unique=True)
     await db.login_attempts.create_index('identifier')
+    # New content collections are initialized empty; existing content is never replaced.
+    new_collections = ('domains', 'solutions', 'sectors', 'project_categories', 'technologies',
+                       'methodology_phases', 'articles', 'article_categories')
+    existing_names = await db.list_collection_names()
+    for collection in new_collections:
+        if collection not in existing_names:
+            await db.create_collection(collection)
+    for collection in ('domains', 'solutions', 'sectors', 'project_categories', 'technologies',
+                       'methodology_phases', 'articles', 'article_categories', 'services',
+                       'projects', 'delivery_models'):
+        await db[collection].create_index([('slug', 1)], sparse=True)
+        await db[collection].create_index([('published', 1), ('order', 1)])
+    await db.services.create_index('domain_id', sparse=True)
+    await db.projects.create_index('category_id', sparse=True)
+    await db.projects.create_index('service_ids', sparse=True)
+    await db.projects.create_index('solution_ids', sparse=True)
+    await db.projects.create_index('sector_ids', sparse=True)
+    await db.projects.create_index('technology_ids', sparse=True)
+    await db.projects.create_index('delivery_model_ids', sparse=True)
+    await db.solutions.create_index('service_ids', sparse=True)
+    await db.solutions.create_index('sector_ids', sparse=True)
+    await db.solutions.create_index('technology_ids', sparse=True)
+    await db.services.create_index('technology_ids', sparse=True)
+    await db.delivery_models.create_index('service_ids', sparse=True)
+    await db.articles.create_index('category_id', sparse=True)
     await _seed_admin()
 
     # Initialize settings when the collection is empty. If an existing settings
     # document is partial, add only missing default keys; never overwrite values
     # configured by the user/admin.
     existing_settings = await db.settings.find_one({})
+    if existing_settings and existing_settings.get('company_name') == '2Morro Technically Solutions':
+        await db.settings.update_one({'_id': existing_settings['_id']}, {'$set': {
+            'company_name': '2Morro Technology Solutions',
+            'company_profile.name': '2Morro Technology Solutions',
+        }})
+        existing_settings = await db.settings.find_one({'_id': existing_settings['_id']})
+    if existing_settings:
+        # Correct the known historical spelling typo without changing other wording.
+        def _correct_brand(value):
+            if isinstance(value, str):
+                return value.replace('2Morro Technically Solutions', '2Morro Technology Solutions')
+            if isinstance(value, list):
+                return [_correct_brand(item) for item in value]
+            if isinstance(value, dict):
+                return {key: _correct_brand(item) for key, item in value.items()}
+            return value
+        brand_updates = {}
+        for field in ('tagline', 'hero_title', 'hero_subtitle', 'about_short', 'about_content', 'mission', 'vision', 'footer_text', 'seo_title', 'seo_description', 'en', 'pages', 'company_profile'):
+            value = existing_settings.get(field)
+            corrected = _correct_brand(value)
+            if corrected != value:
+                brand_updates[field] = corrected
+        if brand_updates:
+            await db.settings.update_one({'_id': existing_settings['_id']}, {'$set': brand_updates})
+        contact_defaults = {}
+        if not existing_settings.get('email'):
+            contact_defaults['email'] = '2morroTS@gmail.com'
+        if not existing_settings.get('whatsapp_number'):
+            contact_defaults['whatsapp_number'] = '967782009690'
+        if not existing_settings.get('phone'):
+            contact_defaults['phone'] = '+967 5400999'
+        if not existing_settings.get('website'):
+            contact_defaults['website'] = 'https://www.2morroTS.com'
+        if contact_defaults:
+            await db.settings.update_one({'_id': existing_settings['_id']}, {'$set': contact_defaults})
     if existing_settings is None:
         await db.settings.insert_one(default_settings())
     else:
@@ -245,6 +509,72 @@ async def run_seed():
     await _seed_collection('projects', _project_docs)
     await _seed_collection('delivery_models', _model_docs)
     await _backfill()
+    await _migrate_legacy_delivery_steps()
+    # Draft reference content from the approved information architecture.
+    # These records are intentionally unpublished until the company reviews them.
+    domain_translations = {
+        'الاتصالات والشبكات': 'Telecommunications and Networking',
+        'البنية الرقمية والسحابة': 'Digital Infrastructure and Cloud',
+        'الأمن السيبراني والأنظمة الأمنية': 'Cybersecurity and Security Systems',
+        'البرمجيات والحلول المؤسسية': 'Software and Enterprise Solutions',
+        'الحلول الذكية وإنترنت الأشياء': 'Smart Solutions and Internet of Things',
+        'الاستشارات والتكامل الهندسي': 'Consulting and Engineering Integration',
+    }
+    sector_translations = {
+        'الحكومة': 'Government', 'مشغلو الاتصالات': 'Telecommunications Operators',
+        'النفط والغاز': 'Oil and Gas', 'البنوك': 'Banking', 'الجامعات': 'Universities', 'المستشفيات': 'Hospitals',
+    }
+    phase_translations = {
+        'فهم المتطلبات': 'Requirements Discovery', 'التصميم': 'Design',
+        'التنفيذ والتكامل': 'Implementation and Integration', 'الفحص والتسليم': 'Testing and Handover',
+        'التشغيل والدعم': 'Operations and Support',
+    }
+    phase_desc_translations = {
+        'فهم المتطلبات': 'Analyze client needs and define objectives, scope and priorities.',
+        'التصميم': 'Prepare the technical concept and design the solution and suitable architecture.',
+        'التنفيذ والتكامل': 'Implement solution components and integrate related systems and services.',
+        'الفحص والتسليم': 'Test deliverables, verify requirements and document the handover.',
+        'التشغيل والدعم': 'Launch the solution, monitor its operation and provide agreed support.',
+    }
+    reference_sets = {
+        'domains': [
+            'الاتصالات والشبكات', 'البنية الرقمية والسحابة', 'الأمن السيبراني والأنظمة الأمنية',
+            'البرمجيات والحلول المؤسسية', 'الحلول الذكية وإنترنت الأشياء', 'الاستشارات والتكامل الهندسي',
+        ],
+        'sectors': ['الحكومة', 'مشغلو الاتصالات', 'النفط والغاز', 'البنوك', 'الجامعات', 'المستشفيات'],
+        'methodology_phases': [
+            ('فهم المتطلبات', 'تحليل احتياجات العميل وتحديد الأهداف والنطاق والأولويات.'),
+            ('التصميم', 'إعداد التصور الفني وتصميم الحل والبنية المناسبة.'),
+            ('التنفيذ والتكامل', 'تنفيذ المكونات وربطها بالأنظمة والخدمات ذات العلاقة.'),
+            ('الفحص والتسليم', 'اختبار المخرجات والتحقق من مطابقتها ثم توثيق التسليم.'),
+            ('التشغيل والدعم', 'إطلاق الحل ومتابعة تشغيله وتقديم الدعم وفق الاتفاق.'),
+        ],
+    }
+    for collection, entries in reference_sets.items():
+        for idx, entry in enumerate(entries, 1):
+            if collection == 'methodology_phases':
+                name, short_desc = entry
+            else:
+                name, short_desc = entry, 'مجال ضمن نطاق خدمات وحلول الشركة، وتفاصيله قيد المراجعة والاعتماد.'
+            doc_id = f'arch-{collection}-{idx:02d}'
+            await db[collection].update_one({'_id': doc_id}, {'$setOnInsert': {
+                'name': name, 'short_desc': short_desc, 'detailed_desc': '', 'en': {},
+                'order': idx, 'published': collection == 'methodology_phases', 'is_demo': collection != 'methodology_phases', 'slug': slugify(name, doc_id),
+                'activities': [], 'outputs': [],
+                'en': {'name': (domain_translations.get(name) if collection == 'domains' else sector_translations.get(name) if collection == 'sectors' else phase_translations.get(name)) or name, **({'short_desc': phase_desc_translations.get(name, short_desc)} if collection == 'methodology_phases' else {})},
+                'created_at': now_iso(), 'updated_at': now_iso(),
+            }}, upsert=True)
+    # Seed the supplied company profile, six proposed solution bundles and clearly labelled demo showcases.
+    await _seed_profile_records()
+    # Safe, idempotent compatibility migration: preserve legacy fields while
+    # introducing normalized relationship arrays from explicit existing IDs.
+    async for project in db.projects.find({'service_id': {'$exists': True, '$nin': ['', None]}, 'service_ids': {'$exists': False}}):
+        await db.projects.update_one({'_id': project['_id']}, {'$set': {'service_ids': [project['service_id']]}})
+    async for service in db.services.find({'domain_id': {'$exists': False}}):
+        await db.services.update_one({'_id': service['_id']}, {'$set': {'domain_id': ''}})
+    for collection in ('services', 'projects'):
+        await db[collection].update_many({'updated_at': {'$exists': False}}, {'$set': {'updated_at': ''}})
+    await _backfill()
 
 
 EN_SOURCES = (('services', 'svc', SERVICES_EN, service_en), ('projects', 'prj', PROJECTS_EN, project_en),
@@ -261,15 +591,26 @@ async def _backfill():
 
 
 async def reset_demo_content():
+    """Restore missing demo seeds without overwriting administrator edits."""
     restored = 0
     for col, build in (('services', _service_docs), ('projects', _project_docs), ('delivery_models', _model_docs)):
         docs = build()
         if hasattr(docs, '__await__'):
             docs = await docs
         for doc in docs:
-            await db[col].replace_one({'_id': doc['_id']}, doc, upsert=True)
-            restored += 1
+            result = await db[col].update_one(
+                {'_id': doc['_id']},
+                {'$setOnInsert': doc},
+                upsert=True,
+            )
+            if result.upserted_id is not None:
+                restored += 1
     for col, prefix, items, builder in EN_SOURCES:
         for idx in range(1, len(items) + 1):
-            await db[col].update_one({'_id': f'{prefix}-{idx:02d}'}, {'$set': {'en': builder(idx)}})
+            await db[col].update_one(
+                {'_id': f'{prefix}-{idx:02d}', 'en': {'$exists': False}},
+                {'$set': {'en': builder(idx)}},
+            )
+    await _migrate_legacy_delivery_steps()
+    await _seed_profile_records()
     return restored

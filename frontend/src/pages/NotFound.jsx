@@ -6,7 +6,7 @@ import { useSEO } from "@/hooks/useSEO";
 import { t } from "@/lib/i18n";
 
 export default function NotFound() {
-  useSEO({ title: t("الصفحة غير موجودة | 2Morro Technically Solutions"), description: t("الصفحة المطلوبة غير موجودة.") });
+  useSEO({ title: t("الصفحة غير موجودة | 2Morro Technology Solutions"), description: t("الصفحة المطلوبة غير موجودة."), robots: "noindex,follow" });
   return (
     <div className="flex min-h-screen flex-col bg-navy-900" data-testid="not-found-page">
       <Navbar />

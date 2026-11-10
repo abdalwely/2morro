@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import api from "@/lib/api";
 import { Plus, Pencil, Trash2, Eye, ArrowUp, ArrowDown, Briefcase } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
@@ -11,11 +13,13 @@ import { LoadingBlock, EmptyState, SafeImage } from "@/components/site/Shared";
 const EMPTY = {
   en: {},
   name: "", short_desc: "", detailed_desc: "", icon: "Globe", image_url: "",
-  features: [], category: "", order: 0, published: false, seo_title: "", seo_description: "",
+  features: [], category: "", domain_id: "", technology_ids: [], order: 0, published: false, seo_title: "", seo_description: "",
 };
 
 export default function ServicesAdmin() {
   const { items, loading, save, remove, setOrder, togglePublish } = useCrud("services");
+  const { data: domains = [] } = useQuery({ queryKey: ["admin-domains"], queryFn: () => api.get("/admin/domains").then(r => r.data) });
+  const { data: technologies = [] } = useQuery({ queryKey: ["admin-technologies"], queryFn: () => api.get("/admin/technologies").then(r => r.data) });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY);
@@ -30,9 +34,10 @@ export default function ServicesAdmin() {
   const openEdit = (item) => {
     setEditing(item);
     setForm({
+      en: item.en || {},
       name: item.name || "", short_desc: item.short_desc || "", detailed_desc: item.detailed_desc || "",
       icon: item.icon || "Globe", image_url: item.image_url || "", features: item.features || [],
-      category: item.category || "", order: item.order || 0, published: Boolean(item.published),
+      category: item.category || "", domain_id: item.domain_id || "", technology_ids: item.technology_ids || [], order: item.order || 0, published: Boolean(item.published),
       seo_title: item.seo_title || "", seo_description: item.seo_description || "",
     });
     setDialogOpen(true);
@@ -142,6 +147,12 @@ export default function ServicesAdmin() {
               <Field label="التصنيف">
                 <input className={inputCls} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="مثال: تطوير الأنظمة" data-testid="admin-service-form-category" />
               </Field>
+              <Field label="المجال التقني المرتبط">
+                <select className={inputCls} value={form.domain_id} onChange={(e) => setForm({ ...form, domain_id: e.target.value })}>
+                  <option value="">بدون مجال محدد</option>
+                  {domains.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                </select>
+              </Field>
             </div>
             <Field label="الوصف المختصر *">
               <textarea className={`${inputCls} min-h-[70px]`} value={form.short_desc} onChange={(e) => setForm({ ...form, short_desc: e.target.value })} required data-testid="admin-service-form-short-desc" />
@@ -169,10 +180,15 @@ export default function ServicesAdmin() {
                 <input type="number" min="0" className={inputCls} value={form.order} onChange={(e) => setForm({ ...form, order: Number(e.target.value) })} data-testid="admin-service-form-order" />
               </Field>
             </div>
-            <EnglishFields form={form} setForm={setForm} testid="admin-service-form" fields={[{ key: "name", label: "Service name" }, { key: "category", label: "Category" }, { key: "short_desc", label: "Short description", type: "textarea" }, { key: "detailed_desc", label: "Detailed description", type: "textarea" }, { key: "features", label: "Features", type: "list" }]} />
+            <EnglishFields form={form} setForm={setForm} testid="admin-service-form" fields={[{ key: "name", label: "Service name" }, { key: "category", label: "Category" }, { key: "short_desc", label: "Short description", type: "textarea" }, { key: "detailed_desc", label: "Detailed description", type: "textarea" }, { key: "features", label: "Features", type: "list" }, { key: "seo_title", label: "SEO title" }, { key: "seo_description", label: "SEO description", type: "textarea" }]} />
             <ImageUploader value={form.image_url} onChange={(u) => setForm({ ...form, image_url: u })} label="صورة الخدمة (اختياري)" testid="admin-service-form-image" />
             <Field label="المزايا والمخرجات">
               <DynamicList items={form.features} onChange={(f) => setForm({ ...form, features: f })} placeholder="مثال: تصميم متجاوب مع جميع الشاشات" testid="admin-service-form-features" />
+            </Field>
+            <Field label="التقنيات المرتبطة">
+              <div className="grid gap-2 rounded-xl border border-slate-200 p-3 sm:grid-cols-2">
+                {technologies.length === 0 ? <span className="text-xs text-slate-500">أضف التقنيات أولاً من إدارة المنظومة التقنية.</span> : technologies.map(tech => <label key={tech.id} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.technology_ids.includes(tech.id)} onChange={e => setForm({ ...form, technology_ids: e.target.checked ? [...form.technology_ids, tech.id] : form.technology_ids.filter(id => id !== tech.id) })} />{tech.name}</label>)}
+              </div>
             </Field>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="عنوان SEO">

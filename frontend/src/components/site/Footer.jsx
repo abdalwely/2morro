@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Mail, MessageCircle, Linkedin, Twitter, Instagram, Github } from "lucide-react";
+import { Mail, MessageCircle, Linkedin, Twitter, Instagram, Github, Phone, MapPin, Globe } from "lucide-react";
 import api, { imgSrc, waLink } from "@/lib/api";
 import { t, tr, getLang } from "@/lib/i18n";
 
@@ -8,8 +8,16 @@ const QUICK_LINKS = [
   { to: "/", label: "الرئيسية" },
   { to: "/about", label: "من نحن" },
   { to: "/services", label: "خدماتنا" },
+  { to: "/solutions", label: "حلولنا" },
+  { to: "/domains", label: "المجالات التقنية" },
+  { to: "/sectors", label: "القطاعات" },
+  { to: "/technology", label: "المنظومة التقنية" },
   { to: "/projects", label: "مشاريعنا" },
+  { to: "/methodology", label: "منهجية العمل" },
   { to: "/models", label: "نماذج التنفيذ" },
+  { to: "/knowledge", label: "مركز المعرفة" },
+  { to: "/privacy", label: "سياسة الخصوصية" },
+  { to: "/terms", label: "الشروط والأحكام" },
   { to: "/contact", label: "تواصل معنا" },
 ];
 
@@ -85,6 +93,9 @@ export default function Footer() {
                 <span dir="ltr">{settings.whatsapp_number}</span>
               </a>
             )}
+            {settings?.phone && <a href={`tel:${settings.phone.replace(/[^+0-9]/g, "")}`} className="flex items-center gap-2 text-sm transition-colors hover:text-aqua"><Phone className="h-4 w-4 text-aqua" /><span dir="ltr">{settings.phone}</span></a>}
+            {settings?.address && <div className="flex items-start gap-2 text-sm"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-aqua" /><span>{settings.address}</span></div>}
+            {settings?.website && <a href={settings.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm transition-colors hover:text-aqua"><Globe className="h-4 w-4 text-aqua" /><span dir="ltr">{settings.website.replace(/^https?:\/\//, "")}</span></a>}
             {!settings?.email && !settings?.whatsapp_number && (
               <p className="text-sm text-slate-500">{t("لم تُضف بيانات التواصل بعد — يمكن للمسؤول إضافتها من لوحة التحكم.")}</p>
             )}
@@ -108,7 +119,7 @@ export default function Footer() {
 
       <div className="border-t border-white/10">
         <div className="container-x flex flex-col items-center justify-between gap-2 py-5 text-xs text-slate-500 sm:flex-row">
-          <span data-testid="footer-copyright">{(getLang() === "en" ? settings?.copyright_text_en : settings?.copyright_text) || `© ${year} ${settings?.company_name || "2Morro Technically Solutions"} — ${t("جميع الحقوق محفوظة")}`}</span>
+          <span data-testid="footer-copyright">{(getLang() === "en" ? settings?.copyright_text_en : settings?.copyright_text) || `© ${year} ${settings?.company_name || "2Morro Technology Solutions"} — ${t("جميع الحقوق محفوظة")}`}</span>
           <Link to="/admin" className="transition-colors hover:text-aqua" data-testid="footer-admin-link">
             {t("لوحة التحكم الإدارية")}
           </Link>

@@ -13,9 +13,10 @@ import {
   EmptyState,
   ApiErrorNotice,
 } from "@/components/site/Shared";
-import { t, tr } from "@/lib/i18n";
+import { t, tr, trPage } from "@/lib/i18n";
 
 export default function Services() {
+  const { data: settings } = useQuery({ queryKey: ["settings"], queryFn: () => api.get("/settings").then(r => r.data) });
   const [category, setCategory] = useState(t("الكل"));
   const {
     data: services,
@@ -26,15 +27,14 @@ export default function Services() {
     queryFn: () => api.get("/services").then((r) => r.data),
   });
   useSEO({
-    title: t("خدماتنا | 2Morro Technically Solutions"),
-    description: t(
-      "استعرض قائمة الخدمات التقنية التي تقدمها شركة 2Morro Technically Solutions: التطوير، الحلول السحابية، الأمن السيبراني، تحليل البيانات والمزيد.",
-    ),
+    title: `${trPage(settings, "services", "title") || t("خدماتنا")} | 2Morro Technology Solutions`,
+    description: trPage(settings, "services", "subtitle") || t("استعرض قائمة الخدمات التقنية التي تقدمها شركة 2Morro Technology Solutions: التطوير، الحلول السحابية، الأمن السيبراني، تحليل البيانات والمزيد."),
+    image: settings?.seo?.og_image_url || settings?.logo_url,
   });
 
   const categories = useMemo(() => {
     const set = new Set(
-      (services || []).map((s) => tr(s, "category")).filter(Boolean),
+      (services || []).map((s) => tr(s.relations?.domain_id?.[0], "name") || tr(s, "category")).filter(Boolean),
     );
     return [t("الكل"), ...Array.from(set)];
   }, [services]);
@@ -42,7 +42,7 @@ export default function Services() {
   const filtered =
     category === t("الكل")
       ? services || []
-      : (services || []).filter((s) => tr(s, "category") === category);
+      : (services || []).filter((s) => (tr(s.relations?.domain_id?.[0], "name") || tr(s, "category")) === category);
   const hasDemo = (services || []).some((s) => s.is_demo);
 
   return (

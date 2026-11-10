@@ -7,11 +7,11 @@ import { useAdminAuth } from "@/context/AdminAuthContext";
 import { Field, inputCls, DynamicList, ConfirmAction, Card } from "@/components/admin/AdminUI";
 
 const EN_TEXTS = [
-  ["tagline", "Tagline"], ["hero_title", "Home title"], ["hero_subtitle", "Home description", true], ["about_short", "About summary"],
+  ["company_name", "Company name"], ["tagline", "Tagline"], ["hero_title", "Home title"], ["hero_subtitle", "Home description", true], ["about_short", "About summary"],
   ["about_content", "About page content", true], ["mission", "Mission", true], ["vision", "Vision", true], ["quality_content", "Quality section", true],
   ["methodology_content", "Methodology section", true], ["footer_text", "Footer text", true], ["seo_title", "SEO title"], ["seo_description", "SEO description", true],
 ];
-const PAGES = [["about", "من نحن"], ["services", "الخدمات"], ["projects", "المشاريع"], ["models", "نماذج التنفيذ"], ["contact", "تواصل معنا"]];
+const PAGES = [["about", "من نحن"], ["services", "الخدمات"], ["projects", "المشاريع"], ["models", "نماذج التنفيذ"], ["contact", "تواصل معنا"], ["domains", "المجالات التقنية"], ["solutions", "الحلول المتكاملة"], ["sectors", "القطاعات"], ["technology", "المنظومة التقنية"], ["methodology", "منهجية العمل"], ["knowledge", "مركز المعرفة"], ["privacy", "سياسة الخصوصية"], ["terms", "الشروط والأحكام"]];
 
 export function EnglishTextsCard({ form, setForm }) {
   const en = form.en || {};

@@ -85,8 +85,10 @@ export default function ServiceDetail() {
   const { data: projects } = useQuery({ queryKey: ["projects"], queryFn: fetcher("/projects") });
 
   useSEO({
-    title: service ? `${service.seo_title || tr(service, "name")} | 2Morro Technically Solutions` : t("الخدمة | 2Morro Technically Solutions"),
-    description: service?.seo_description || tr(service, "short_desc"),
+    title: service ? `${tr(service, "seo_title") || tr(service, "name")} | 2Morro Technology Solutions` : t("الخدمة | 2Morro Technology Solutions"),
+    description: tr(service, "seo_description") || tr(service, "short_desc"),
+    image: service?.image_url,
+    schema: service ? { "@context": "https://schema.org", "@type": "Service", name: tr(service, "name"), description: tr(service, "short_desc"), image: service.image_url || undefined, provider: { "@type": "Organization", name: "2Morro Technology Solutions" } } : undefined,
   });
 
   if (isLoading) return <DetailLoading />;
@@ -97,7 +99,7 @@ export default function ServiceDetail() {
     );
   }
 
-  const relatedProjects = (projects || []).filter((p) => p.service_id === service.id).slice(0, 3);
+  const relatedProjects = (projects || []).filter((p) => (p.service_ids || []).includes(service.id) || (p.service_id === service.id) || (p.relations?.service_ids || []).some(s => s.id === service.id)).slice(0, 3);
   const wa = settings?.whatsapp_number ? waLink(settings.whatsapp_number, t("مرحبًا، أود الاستفسار عن خدمة: {name}", { name: tr(service, "name") })) : "";
   const hasText = Boolean((tr(service, "detailed_desc") || "").trim());
 
@@ -121,6 +123,7 @@ export default function ServiceDetail() {
               </Reveal>
             )}
             <ServiceFeatures features={tr(service, "features")} />
+            {(service.relations?.domain_id?.length > 0 || service.relations?.technology_ids?.length > 0) && <div className="mt-8 space-y-4">{service.relations?.domain_id?.[0] && <div><h3 className="text-sm font-bold text-slate-800">{t("المجال التقني")}</h3><span className="mt-2 inline-block rounded-full bg-slate-100 px-3 py-1.5 text-sm text-slate-700">{tr(service.relations.domain_id[0], "name")}</span></div>}{service.relations?.technology_ids?.length > 0 && <div><h3 className="text-sm font-bold text-slate-800">{t("التقنيات المرتبطة")}</h3><div className="mt-2 flex flex-wrap gap-2">{service.relations.technology_ids.map(x => <span key={x.id} className="rounded-full bg-slate-100 px-3 py-1.5 text-sm text-slate-700">{tr(x, "name")}</span>)}</div></div>}</div>}
           </div>
           <aside>
             <div className="sticky top-24 rounded-2xl border border-slate-200 bg-slate-50 p-6">

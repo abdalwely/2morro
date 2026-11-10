@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import api from "@/lib/api";
 import { Plus, Pencil, Trash2, Eye, ArrowUp, ArrowDown, Route } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
@@ -8,12 +10,13 @@ import { LoadingBlock, EmptyState } from "@/components/site/Shared";
 
 const EMPTY = {
   en: {},
-  name: "", short_desc: "", detailed_desc: "", phases: [], outputs: [],
+  name: "", short_desc: "", detailed_desc: "", scope: "", service_ids: [], outputs: [],
   image_url: "", duration: "", order: 0, published: false,
 };
 
 export default function ModelsAdmin() {
   const { items, loading, save, remove, setOrder, togglePublish } = useCrud("delivery_models");
+  const { data: services = [] } = useQuery({ queryKey: ["admin-services"], queryFn: () => api.get("/admin/services").then(r => r.data) });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY);
@@ -28,9 +31,9 @@ export default function ModelsAdmin() {
   const openEdit = (item) => {
     setEditing(item);
     setForm({
+      en: item.en || {},
       name: item.name || "", short_desc: item.short_desc || "", detailed_desc: item.detailed_desc || "",
-      phases: (item.phases || []).map((p) => ({ title: p.title || "", desc: p.desc || "" })),
-      outputs: item.outputs || [], image_url: item.image_url || "", duration: item.duration || "",
+      outputs: item.outputs || [], scope: item.scope || "", service_ids: item.service_ids || [], image_url: item.image_url || "", duration: item.duration || "",
       order: item.order || 0, published: Boolean(item.published),
     });
     setDialogOpen(true);
@@ -41,16 +44,12 @@ export default function ModelsAdmin() {
     const ok = await save(form, editing?.id);
     if (ok) setDialogOpen(false);
   };
-  const setPhase = (i, key, val) => {
-    setForm({ ...form, phases: form.phases.map((p, idx) => (idx === i ? { ...p, [key]: val } : p)) });
-  };
-
   return (
     <div data-testid="admin-models-page">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-heading text-2xl font-extrabold text-slate-900">إدارة نماذج التنفيذ</h1>
-          <p className="mt-1 text-sm text-slate-500">إدارة نماذج منهجية العمل ومراحل التنفيذ والمخرجات.</p>
+          <p className="mt-1 text-sm text-slate-500">إدارة أساليب التعاقد والتوريد والتنفيذ والتشغيل والدعم، وهي مستقلة تمامًا عن مراحل منهجية العمل.</p>
         </div>
         <button onClick={openNew} className="btn-primary !px-4 !py-2.5 !text-xs" data-testid="admin-model-add-button">
           <Plus className="h-4 w-4" />
@@ -71,7 +70,7 @@ export default function ModelsAdmin() {
               <thead>
                 <tr className="border-b border-slate-200 text-xs text-slate-400">
                   <th className="p-3 sm:p-4 text-start font-bold">النموذج</th>
-                  <th className="hidden p-4 md:table-cell text-start font-bold">المراحل</th>
+                  <th className="hidden p-4 md:table-cell text-start font-bold">المخرجات</th>
                   <th className="hidden p-4 md:table-cell text-start font-bold">الترتيب</th>
                   <th className="p-3 sm:p-4 text-start font-bold">النشر</th>
                   <th className="p-3 sm:p-4 text-start font-bold">إجراءات</th>
@@ -84,7 +83,7 @@ export default function ModelsAdmin() {
                       <div className="font-bold text-slate-800">{item.name}</div>
                       <div className="mt-0.5 max-w-md truncate text-xs text-slate-400">{item.short_desc}</div>
                     </td>
-                    <td className="hidden p-4 md:table-cell text-slate-600">{item.phases?.length || 0}</td>
+                    <td className="hidden p-4 md:table-cell text-slate-600">{item.outputs?.length || 0}</td>
                     <td className="hidden p-4 md:table-cell">
                       <div className="flex items-center gap-1">
                         <button onClick={() => setOrder(item, "up")} className="rounded-md border border-slate-200 p-1.5 text-slate-500 transition-colors hover:border-electric hover:text-electric disabled:opacity-30" disabled={item.order <= 1} aria-label="تحريك للأعلى" data-testid={`admin-model-move-up-${item.id}`}>
@@ -135,33 +134,14 @@ export default function ModelsAdmin() {
             <Field label="الشرح التفصيلي">
               <textarea className={`${inputCls} min-h-[110px]`} value={form.detailed_desc} onChange={(e) => setForm({ ...form, detailed_desc: e.target.value })} data-testid="admin-model-form-detailed-desc" />
             </Field>
-
-            <div>
-              <span className="mb-1.5 block text-sm font-bold text-slate-700">مراحل التنفيذ</span>
-              <div className="space-y-3">
-                {form.phases.map((ph, i) => (
-                  <div key={i} className="rounded-xl border border-slate-200 bg-slate-50 p-4" data-testid={`admin-model-phase-editor-${i}`}>
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-500">المرحلة {i + 1}</span>
-                      <button type="button" onClick={() => setForm({ ...form, phases: form.phases.filter((_, idx) => idx !== i) })} className="rounded-md border border-slate-200 p-1.5 text-slate-500 transition-colors hover:border-red-300 hover:text-red-600" aria-label="حذف المرحلة" data-testid={`admin-model-phase-remove-${i}`}>
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                    <input className={inputCls} value={ph.title} onChange={(e) => setPhase(i, "title", e.target.value)} placeholder="عنوان المرحلة" data-testid={`admin-model-phase-title-${i}`} />
-                    <textarea className={`${inputCls} mt-2 min-h-[60px]`} value={ph.desc} onChange={(e) => setPhase(i, "desc", e.target.value)} placeholder="وصف المرحلة" data-testid={`admin-model-phase-desc-${i}`} />
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => setForm({ ...form, phases: [...form.phases, { title: "", desc: "" }] })}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 py-2 text-xs font-bold text-slate-500 transition-colors hover:border-electric hover:text-electric"
-                  data-testid="admin-model-phase-add"
-                >
-                  <Plus className="h-4 w-4" />
-                  إضافة مرحلة
-                </button>
+            <Field label="نطاق النموذج أو الخدمة">
+              <textarea className={`${inputCls} min-h-[90px]`} value={form.scope} onChange={e => setForm({ ...form, scope: e.target.value })} placeholder="ما الذي يشمله هذا النموذج؟" />
+            </Field>
+            <Field label="الخدمات التي يغطيها هذا النموذج">
+              <div className="grid gap-2 rounded-xl border border-slate-200 p-3 sm:grid-cols-2">
+                {services.length === 0 ? <span className="text-xs text-slate-500">أضف الخدمات أولاً.</span> : services.map(service => <label key={service.id} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.service_ids.includes(service.id)} onChange={e => setForm({ ...form, service_ids: e.target.checked ? [...form.service_ids, service.id] : form.service_ids.filter(id => id !== service.id) })} />{service.name}</label>)}
               </div>
-            </div>
+            </Field>
 
             <Field label="المخرجات المتوقعة">
               <DynamicList items={form.outputs} onChange={(o) => setForm({ ...form, outputs: o })} placeholder="مثال: وثيقة متطلبات معتمدة" testid="admin-model-form-outputs" />
@@ -175,7 +155,7 @@ export default function ModelsAdmin() {
                 <input type="number" min="0" className={inputCls} value={form.order} onChange={(e) => setForm({ ...form, order: Number(e.target.value) })} data-testid="admin-model-form-order" />
               </Field>
             </div>
-            <EnglishFields form={form} setForm={setForm} testid="admin-model-form" fields={[{ key: "name", label: "Model name" }, { key: "short_desc", label: "Short description", type: "textarea" }, { key: "detailed_desc", label: "Detailed description", type: "textarea" }, { key: "phases", label: "Phases", type: "phases" }, { key: "outputs", label: "Outputs", type: "list" }, { key: "duration", label: "Duration" }]} />
+            <EnglishFields form={form} setForm={setForm} testid="admin-model-form" fields={[{ key: "name", label: "Model name" }, { key: "short_desc", label: "Short description", type: "textarea" }, { key: "detailed_desc", label: "Detailed description", type: "textarea" }, { key: "scope", label: "Scope", type: "textarea" }, { key: "outputs", label: "Outputs", type: "list" }, { key: "duration", label: "Duration" }]} />
             <ImageUploader value={form.image_url} onChange={(u) => setForm({ ...form, image_url: u })} label="صورة أو مخطط توضيحي (اختياري)" testid="admin-model-form-image" />
 
             <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -207,16 +187,6 @@ export default function ModelsAdmin() {
               </div>
               <p className="text-sm text-slate-600">{preview.short_desc}</p>
               <p className="whitespace-pre-line text-sm leading-relaxed text-slate-600">{preview.detailed_desc || "لا يوجد شرح تفصيلي."}</p>
-              {preview.phases?.length > 0 && (
-                <ol className="space-y-2 border-s-2 border-dashed border-electric/30 ps-4">
-                  {preview.phases.map((ph, i) => (
-                    <li key={`${ph.title}-${i}`}>
-                      <span className="text-sm font-bold text-slate-800">{i + 1}. {ph.title}</span>
-                      {ph.desc && <p className="text-xs text-slate-500">{ph.desc}</p>}
-                    </li>
-                  ))}
-                </ol>
-              )}
               {preview.outputs?.length > 0 && (
                 <ul className="space-y-1">
                   {preview.outputs.map((o, i) => (

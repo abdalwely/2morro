@@ -39,7 +39,7 @@ async def lifespan(app: FastAPI):
     database.client.close()
 
 
-app = FastAPI(title='2Morro Technically Solutions', lifespan=lifespan)
+app = FastAPI(title='2Morro Technology Solutions', lifespan=lifespan)
 
 @app.get('/robots.txt', response_class=PlainTextResponse)
 async def robots_txt(request: Request):

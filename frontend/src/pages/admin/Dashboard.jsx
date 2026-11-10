@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Briefcase, Boxes, Route, FileX2, ArrowLeft, History, Users, Images, DatabaseBackup } from "lucide-react";
+import { Briefcase, Boxes, Route, FileX2, ArrowLeft, History, Users, Images, DatabaseBackup, Layers, Lightbulb, BookOpen } from "lucide-react";
 import api from "@/lib/api";
 import { fmtDate } from "@/lib/api";
 
 const ACTION_LABELS = { create: "إضافة", update: "تعديل", delete: "حذف", export: "تنزيل", restore: "استعادة", reset: "إعادة افتراضي" };
-const ENTITY_LABELS = { services: "خدمة", projects: "مشروع", delivery_models: "نموذج تنفيذ", settings: "بيانات الشركة", users: "مستخدم", backup: "نسخة احتياطية", theme: "المظهر", content: "المحتوى" };
+const ENTITY_LABELS = { services: "خدمة", projects: "مشروع", domains: "مجال تقني", solutions: "حل متكامل", sectors: "قطاع", technologies: "تقنية", methodology_phases: "مرحلة منهجية", articles: "مقال", delivery_models: "نموذج تنفيذ", settings: "بيانات الشركة", users: "مستخدم", backup: "نسخة احتياطية", theme: "المظهر", content: "المحتوى" };
 
 function StatCard({ icon: Icon, label, published, total, color, testid, note }) {
   return (
@@ -31,7 +31,7 @@ export default function AdminDashboard() {
   });
 
   const drafts =
-    (stats?.services.drafts || 0) + (stats?.projects.drafts || 0) + (stats?.delivery_models.drafts || 0);
+    (stats?.services.drafts || 0) + (stats?.projects.drafts || 0) + (stats?.delivery_models.drafts || 0) + (stats?.domains.drafts || 0) + (stats?.solutions.drafts || 0) + (stats?.articles.drafts || 0);
 
   return (
     <div data-testid="admin-dashboard">
@@ -56,6 +56,8 @@ export default function AdminDashboard() {
             <StatCard icon={Briefcase} label="الخدمات" published={stats.services.published} total={stats.services.total} color="bg-electric" testid="admin-stat-services" />
             <StatCard icon={Boxes} label="المشاريع" published={stats.projects.published} total={stats.projects.total} color="bg-navy-600" testid="admin-stat-projects" />
             <StatCard icon={Route} label="نماذج التنفيذ" published={stats.delivery_models.published} total={stats.delivery_models.total} color="bg-navy-800" testid="admin-stat-models" />
+            <StatCard icon={Lightbulb} label="الحلول" published={stats.solutions.published} total={stats.solutions.total} color="bg-amber-500" testid="admin-stat-solutions" />
+            <StatCard icon={Layers} label="المجالات التقنية" published={stats.domains.published} total={stats.domains.total} color="bg-indigo-600" testid="admin-stat-domains" />
             <StatCard icon={FileX2} label="عناصر غير منشورة" published={drafts} total={drafts} note="مسودات مخفية عن الزوار" color="bg-amber-500" testid="admin-stat-drafts" />
           </div>
           <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
@@ -80,6 +82,9 @@ export default function AdminDashboard() {
                   <Route className="h-5 w-5 text-electric" />
                   نماذج التنفيذ
                 </Link>
+                <Link to="/admin/solutions" className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm font-bold text-slate-700 transition-all hover:border-electric/40 hover:text-electric"><Lightbulb className="h-5 w-5 text-electric" />إدارة الحلول</Link>
+                <Link to="/admin/domains" className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm font-bold text-slate-700 transition-all hover:border-electric/40 hover:text-electric"><Layers className="h-5 w-5 text-electric" />المجالات التقنية</Link>
+                <Link to="/admin/articles" className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm font-bold text-slate-700 transition-all hover:border-electric/40 hover:text-electric"><BookOpen className="h-5 w-5 text-electric" />مركز المعرفة</Link>
                 <Link to="/admin/settings" className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm font-bold text-slate-700 transition-all hover:border-electric/40 hover:text-electric" data-testid="admin-quick-settings">
                   <FileX2 className="h-5 w-5 text-electric" />
                   بيانات الشركة

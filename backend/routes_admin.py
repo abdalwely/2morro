@@ -32,12 +32,106 @@ ALLOWED_IMAGE_TYPES = {
 MAX_UPLOAD_SIZE = 5 * 1024 * 1024
 
 
+CONTENT_ENTITIES = {
+    'domains': 'المجالات', 'services': 'الخدمات', 'solutions': 'الحلول',
+    'sectors': 'القطاعات', 'projects': 'المشاريع',
+    'project_categories': 'تصنيفات المشاريع', 'technologies': 'التقنيات',
+    'methodology_phases': 'مراحل المنهجية', 'delivery_models': 'نماذج التنفيذ',
+    'articles': 'المقالات والموارد', 'article_categories': 'تصنيفات المعرفة',
+}
+
+RELATION_FIELDS = {
+    'services': {'domain_id': 'domains', 'technology_ids': 'technologies'},
+    'solutions': {'service_ids': 'services', 'sector_ids': 'sectors', 'technology_ids': 'technologies'},
+    'projects': {'category_id': 'project_categories', 'service_id': 'services', 'service_ids': 'services', 'solution_ids': 'solutions', 'sector_ids': 'sectors', 'technology_ids': 'technologies', 'delivery_model_ids': 'delivery_models'},
+    'delivery_models': {'service_ids': 'services'},
+    'articles': {'category_id': 'article_categories'},
+}
+
+RELATION_PROTECT = {
+    'domains': [('services', 'domain_id')],
+    'services': [('solutions', 'service_ids'), ('projects', 'service_ids'), ('delivery_models', 'service_ids')],
+    'solutions': [('projects', 'solution_ids')],
+    'sectors': [('solutions', 'sector_ids'), ('projects', 'sector_ids')],
+    'technologies': [('services', 'technology_ids'), ('solutions', 'technology_ids'), ('projects', 'technology_ids')],
+    'project_categories': [('projects', 'category_id')],
+    'delivery_models': [('projects', 'delivery_model_ids')],
+    'article_categories': [('articles', 'category_id')],
+}
+
+
 def _entity_meta(entity: str):
-    return {
-        'services': (ServiceIn, Service, 'الخدمة'),
-        'projects': (ProjectIn, Project, 'المشروع'),
-        'delivery_models': (DeliveryModelIn, DeliveryModel, 'نموذج التنفيذ'),
-    }[entity]
+    if entity not in CONTENT_ENTITIES:
+        raise HTTPException(status_code=404, detail='نوع المحتوى غير موجود')
+    return (None, None, CONTENT_ENTITIES[entity])
+
+
+async def _validate_relations(entity: str, payload: dict):
+    for field, target in RELATION_FIELDS.get(entity, {}).items():
+        value = payload.get(field)
+        ids = value if isinstance(value, list) else ([value] if value else [])
+        if any(not isinstance(item, str) or not item.strip() for item in ids):
+            raise HTTPException(status_code=400, detail=f'قيم غير صالحة في الحقل {field}')
+        if len(ids) != len(set(ids)):
+            raise HTTPException(status_code=400, detail=f'توجد عناصر مكررة في الحقل {field}')
+        if ids:
+            found = await db[target].count_documents({'_id': {'$in': ids}})
+            if found != len(ids):
+                raise HTTPException(status_code=400, detail=f'توجد مراجع غير صحيحة في {field}')
+
+
+def _validate_content_payload(entity: str, data: dict):
+    if not isinstance(data, dict):
+        raise HTTPException(status_code=400, detail='بيانات المحتوى غير صحيحة')
+    if len(str(data.get('name') or data.get('title') or '').strip()) < 2:
+        raise HTTPException(status_code=400, detail='الاسم أو العنوان مطلوب ويجب ألا يقل عن حرفين')
+    if entity in ('services', 'solutions', 'projects', 'domains', 'sectors', 'delivery_models', 'articles'):
+        short = data.get('short_desc') or data.get('short_description') or data.get('summary') or ''
+        if len(str(short).strip()) < 2:
+            raise HTTPException(status_code=400, detail='الوصف المختصر مطلوب')
+    clean = dict(data)
+    for reserved in ('_id', 'id', 'created_at', 'updated_at', 'is_demo'):
+        clean.pop(reserved, None)
+    string_limits = {
+        'name': 180, 'title': 220, 'slug': 180, 'short_desc': 1200,
+        'short_description': 1200, 'summary': 2000, 'detailed_desc': 30000,
+        'description': 30000, 'content': 100000, 'seo_title': 220,
+        'seo_description': 500, 'image_url': 3000, 'cover_image_url': 3000,
+        'attachment_url': 3000, 'website_url': 3000, 'verification_url': 3000,
+    }
+    for key, limit in string_limits.items():
+        if key in clean and clean[key] is not None:
+            if not isinstance(clean[key], str) or len(clean[key]) > limit:
+                raise HTTPException(status_code=400, detail=f'قيمة الحقل {key} غير صالحة أو تتجاوز الحد المسموح')
+    list_fields = ('service_ids','solution_ids','sector_ids','technology_ids','delivery_model_ids',
+                   'gallery_urls','features','outputs','activities','phases','components','goals')
+    for key in list_fields:
+        if key in clean:
+            if not isinstance(clean[key], list) or len(clean[key]) > 100:
+                raise HTTPException(status_code=400, detail=f'الحقل {key} يجب أن يكون قائمة لا تتجاوز 100 عنصر')
+    try:
+        order = int(clean.get('order') or 0)
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=400, detail='قيمة ترتيب العرض غير صحيحة')
+    if order < 0 or order > 100000:
+        raise HTTPException(status_code=400, detail='قيمة ترتيب العرض خارج النطاق المسموح')
+    if 'published' in clean and not isinstance(clean['published'], bool):
+        raise HTTPException(status_code=400, detail='حالة النشر يجب أن تكون true أو false')
+    if entity == 'projects':
+        if 'service_ids' in clean:
+            clean['service_id'] = clean['service_ids'][0] if clean['service_ids'] else ''
+        elif clean.get('service_id'):
+            clean['service_ids'] = [clean['service_id']]
+    if entity == 'technologies':
+        relationship_type = clean.get('relationship_type', 'technology')
+        if relationship_type not in ('technology', 'platform', 'certification', 'accreditation', 'official_partner'):
+            raise HTTPException(status_code=400, detail='نوع عنصر المنظومة التقنية غير صالح')
+        if relationship_type == 'official_partner' and not str(clean.get('verification_url', '')).startswith(('https://', 'http://')):
+            raise HTTPException(status_code=400, detail='لا يمكن تصنيف جهة كشريك رسمي دون رابط إثبات موثوق')
+    clean['order'] = order
+    clean['published'] = clean.get('published', False)
+    clean['en'] = clean.get('en') if isinstance(clean.get('en'), dict) else {}
+    return clean
 
 
 # ---------------- Auth ----------------
@@ -128,9 +222,10 @@ async def refresh(request: Request, response: Response):
 @admin_router.get('/admin/stats')
 async def stats(user: dict = Depends(get_staff)):
     async def counts(col):
-        total = await db[col].count_documents({})
-        published = await db[col].count_documents({'published': True})
-        demo = await db[col].count_documents({'is_demo': True})
+        query = {'archived_as_methodology': {'$ne': True}} if col == 'delivery_models' else {}
+        total = await db[col].count_documents(query)
+        published = await db[col].count_documents({**query, 'published': True})
+        demo = await db[col].count_documents({**query, 'is_demo': True})
         return {'total': total, 'published': published, 'drafts': total - published, 'demo': demo}
 
     activity = await db.activity.find().sort('created_at', -1).to_list(10)
@@ -139,6 +234,12 @@ async def stats(user: dict = Depends(get_staff)):
         'services': await counts('services'),
         'projects': await counts('projects'),
         'delivery_models': await counts('delivery_models'),
+        'domains': await counts('domains'),
+        'solutions': await counts('solutions'),
+        'sectors': await counts('sectors'),
+        'technologies': await counts('technologies'),
+        'methodology_phases': await counts('methodology_phases'),
+        'articles': await counts('articles'),
         'users': {
             'total': await db.users.count_documents({}),
             'admins': await db.users.count_documents({'role': 'admin'}),
@@ -205,6 +306,34 @@ def _clean_strs(d: dict, allowed=None) -> dict:
     return out
 
 
+def _validate_business_hours(value):
+    if value is None:
+        return
+    if not isinstance(value, dict):
+        raise HTTPException(status_code=400, detail='إعدادات ساعات العمل غير صحيحة')
+    days = value.get('days', [])
+    if not isinstance(days, list) or len(days) > 7:
+        raise HTTPException(status_code=400, detail='قائمة أيام العمل غير صحيحة')
+    seen = set()
+    valid_days = {'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'}
+    time_pattern = re.compile(r'^(?:[01]\d|2[0-3]):[0-5]\d$')
+    for day in days:
+        if not isinstance(day, dict) or day.get('day') not in valid_days or day.get('day') in seen:
+            raise HTTPException(status_code=400, detail='يوجد يوم عمل غير صالح أو مكرر')
+        seen.add(day['day'])
+        if not isinstance(day.get('enabled', False), bool):
+            raise HTTPException(status_code=400, detail='حالة يوم العمل غير صحيحة')
+        if day.get('enabled'):
+            start, end = day.get('open', ''), day.get('close', '')
+            if not isinstance(start, str) or not isinstance(end, str) or not time_pattern.fullmatch(start) or not time_pattern.fullmatch(end) or start >= end:
+                raise HTTPException(status_code=400, detail=f'أوقات العمل غير صحيحة ليوم {day.get("label_ar", day["day"])}')
+    if not isinstance(value.get('configured', False), bool):
+        raise HTTPException(status_code=400, detail='حالة إعداد ساعات العمل غير صحيحة')
+    timezone_name = value.get('timezone', 'Asia/Aden')
+    if not isinstance(timezone_name, str) or len(timezone_name) > 80:
+        raise HTTPException(status_code=400, detail='المنطقة الزمنية غير صحيحة')
+
+
 def _clean_translations(updates: dict):
     if 'en' in updates:
         updates['en'] = _clean_strs(updates['en'], set(TEXT_KEYS))
@@ -226,6 +355,7 @@ async def get_settings_admin(user: dict = Depends(get_staff)):
 async def update_settings(data: SettingsIn, user: dict = Depends(get_staff)):
     updates = {k: v for k, v in data.model_dump().items() if v is not None}
     _validate_contact(updates)
+    _validate_business_hours(updates.get('business_hours'))
     _clean_translations(updates)
     if not updates:
         raise HTTPException(status_code=400, detail='لا توجد بيانات لتحديثها')
@@ -300,16 +430,15 @@ def _clean_en(en) -> dict:
 
 @admin_router.get('/admin/{entity}')
 async def list_all(entity: str, user: dict = Depends(get_staff)):
-    if entity not in ('services', 'projects', 'delivery_models'):
-        raise HTTPException(status_code=404, detail='غير موجود')
-    items = await db[entity].find().sort([('order', 1), ('created_at', 1)]).to_list(500)
+    _entity_meta(entity)
+    query = {'archived_as_methodology': {'$ne': True}} if entity == 'delivery_models' else {}
+    items = await db[entity].find(query).sort([('order', 1), ('created_at', 1)]).to_list(1000)
     return [doc_to_model(i) for i in items]
 
 
 @admin_router.get('/admin/{entity}/{item_id}')
 async def get_one(entity: str, item_id: str, user: dict = Depends(get_staff)):
-    if entity not in ('services', 'projects', 'delivery_models'):
-        raise HTTPException(status_code=404, detail='غير موجود')
+    _entity_meta(entity)
     doc = await db[entity].find_one({'_id': item_id})
     if not doc:
         raise HTTPException(status_code=404, detail='العنصر غير موجود')
@@ -318,62 +447,53 @@ async def get_one(entity: str, item_id: str, user: dict = Depends(get_staff)):
 
 @admin_router.post('/admin/{entity}')
 async def create_item(entity: str, data: dict, user: dict = Depends(get_staff)):
-    if entity not in ('services', 'projects', 'delivery_models'):
-        raise HTTPException(status_code=404, detail='غير موجود')
-    in_model, full_model, label = _entity_meta(entity)
-    try:
-        validated = in_model(**data)
-    except Exception:
-        raise HTTPException(status_code=400, detail='يرجى تعبئة الحقول المطلوبة بشكل صحيح (الاسم والوصف المختصر)')
-
+    _entity_meta(entity)
+    payload = _validate_content_payload(entity, data)
+    await _validate_relations(entity, payload)
     item_id = new_id()
-    doc = validated.model_dump()
-    doc['en'] = _clean_en(doc.get('en'))
+    name = payload.get('name') or payload.get('title') or 'مرحلة منهجية'
+    doc = payload
     doc['_id'] = item_id
-    doc['slug'] = await unique_slug(entity, doc['name'], item_id)
+    doc['slug'] = await unique_slug(entity, name, item_id)
     doc['is_demo'] = False
     doc['created_at'] = now_iso()
     doc['updated_at'] = now_iso()
     await db[entity].insert_one(doc)
-    await log_activity('create', entity, doc['name'], user)
+    await log_activity('create', entity, name, user)
     return doc_to_model(doc)
 
 
 @admin_router.put('/admin/{entity}/{item_id}')
 async def update_item(entity: str, item_id: str, data: dict, user: dict = Depends(get_staff)):
-    if entity not in ('services', 'projects', 'delivery_models'):
-        raise HTTPException(status_code=404, detail='غير موجود')
-    in_model, full_model, label = _entity_meta(entity)
+    _entity_meta(entity)
     existing = await db[entity].find_one({'_id': item_id})
     if not existing:
         raise HTTPException(status_code=404, detail='العنصر غير موجود')
-
-    merged = {k: v for k, v in existing.items() if k in in_model.model_fields}
-    merged.update({k: v for k, v in data.items() if k in in_model.model_fields})
-    try:
-        validated = in_model(**merged)
-    except Exception:
-        raise HTTPException(status_code=400, detail='يرجى تعبئة الحقول المطلوبة بشكل صحيح (الاسم والوصف المختصر)')
-
-    updates = validated.model_dump()
-    updates['en'] = _clean_en(updates.get('en'))
-    if existing.get('name') != updates['name']:
-        updates['slug'] = await unique_slug(entity, updates['name'], item_id)
-    updates['updated_at'] = now_iso()
-    await db[entity].update_one({'_id': item_id}, {'$set': updates})
-    await log_activity('update', entity, updates['name'], user)
-    doc = await db[entity].find_one({'_id': item_id})
-    return doc_to_model(doc)
+    merged = {k: v for k, v in existing.items() if k != '_id'}
+    merged.update(data)
+    payload = _validate_content_payload(entity, merged)
+    await _validate_relations(entity, payload)
+    name = payload.get('name') or payload.get('title') or 'مرحلة منهجية'
+    if name != existing.get('name', existing.get('title')):
+        payload['slug'] = await unique_slug(entity, name, item_id)
+    else:
+        payload['slug'] = existing.get('slug') or await unique_slug(entity, name, item_id)
+    payload['updated_at'] = now_iso()
+    await db[entity].update_one({'_id': item_id}, {'$set': payload})
+    await log_activity('update', entity, name, user)
+    return doc_to_model(await db[entity].find_one({'_id': item_id}))
 
 
 @admin_router.delete('/admin/{entity}/{item_id}')
 async def delete_item(entity: str, item_id: str, user: dict = Depends(get_staff)):
-    if entity not in ('services', 'projects', 'delivery_models'):
-        raise HTTPException(status_code=404, detail='غير موجود')
+    _entity_meta(entity)
     doc = await db[entity].find_one({'_id': item_id})
     if not doc:
         raise HTTPException(status_code=404, detail='العنصر غير موجود')
+    for dependent, field in RELATION_PROTECT.get(entity, []):
+        query = {field: item_id} if field.endswith('_id') else {field: item_id}
+        if await db[dependent].find_one(query, {'_id': 1}):
+            raise HTTPException(status_code=409, detail=f'لا يمكن حذف العنصر لارتباطه بمحتوى في {CONTENT_ENTITIES.get(dependent, dependent)}. عالج العلاقات أولاً أو ألغِ نشره.')
     await db[entity].delete_one({'_id': item_id})
-    await log_activity('delete', entity, doc.get('name', ''), user)
+    await log_activity('delete', entity, doc.get('name', doc.get('title', '')), user)
     return {'message': 'تم الحذف بنجاح'}
-

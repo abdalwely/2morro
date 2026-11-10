@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, MessageCircle, Mail, Compass, Shield, Handshake, Target, CheckCircle2, Route } from "lucide-react";
+import { ArrowLeft, MessageCircle, Mail, Compass, Shield, Handshake, Target, CheckCircle2, Route, Building2, Cpu, BookOpen } from "lucide-react";
 import Reveal from "@/components/site/Reveal";
 import { ServiceCard, ProjectCard } from "@/components/site/Cards";
 import { LoadingBlock, SafeImage, HeaderBackground } from "@/components/site/Shared";
@@ -93,6 +93,37 @@ export function HomeHero({ settings, wa }) {
       </div>
     </section>
   );
+}
+
+export function HomeDomains({ domains }) {
+  if (!domains?.length) return null;
+  return <section className="py-16 sm:py-20" data-testid="home-domains-section"><div className="container-x"><Reveal><div className="mb-9 max-w-2xl"><span className="chip border-electric/20 bg-electric-50 text-electric">{t("المجالات التقنية")}</span><h2 className="mt-4 text-2xl font-bold text-slate-900 sm:text-3xl">{t("خبرات تقنية مترابطة")}</h2><p className="mt-3 leading-relaxed text-slate-600">{t("مجالاتنا التقنية التي تغطي خبرات وخدمات الشركة.")}</p></div></Reveal><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{domains.slice(0, 6).map((item, i) => <Reveal key={item.id} delay={(i % 3) * 50}><Link to={`/domains/${item.slug}`} className="block h-full rounded-2xl border border-slate-200 bg-white p-5 transition-all hover:-translate-y-1 hover:border-electric/40 hover:shadow-lg"><span className="text-xs font-bold text-electric">{t("مجال تقني")}</span><h3 className="mt-3 text-lg font-extrabold text-slate-900">{tr(item, "name")}</h3><p className="mt-2 line-clamp-3 text-sm leading-7 text-slate-600">{tr(item, "short_desc") || tr(item, "detailed_desc")}</p></Link></Reveal>)}</div><div className="mt-6 text-end"><Link to="/domains" className="inline-flex items-center gap-2 text-sm font-bold text-electric">{t("جميع المجالات")} <ArrowLeft className="h-4 w-4" /></Link></div></div></section>;
+}
+
+export function HomeSolutions({ solutions }) {
+  if (!solutions?.length) return null;
+  return <section className="bg-slate-50 py-16 sm:py-20" data-testid="home-solutions-section"><div className="container-x"><Reveal><div className="mb-9 max-w-2xl"><span className="chip border-electric/20 bg-electric-50 text-electric">{t("الحلول المتكاملة")}</span><h2 className="mt-4 text-2xl font-bold text-slate-900 sm:text-3xl">{t("حلول تجمع الخدمات والتقنيات")}</h2><p className="mt-3 leading-relaxed text-slate-600">{t("حلول مترابطة تُبنى لتلبية احتياجات الأعمال والقطاعات المختلفة.")}</p></div></Reveal><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{solutions.slice(0, 6).map((item, i) => <Reveal key={item.id} delay={(i % 3) * 50}><Link to={`/solutions/${item.slug}`} className="block h-full rounded-2xl border border-slate-200 bg-white p-5 transition-all hover:-translate-y-1 hover:border-electric/40 hover:shadow-lg"><span className="text-xs font-bold text-electric">{t("حل متكامل")}</span><h3 className="mt-3 text-lg font-extrabold text-slate-900">{tr(item, "name")}</h3><p className="mt-2 line-clamp-3 text-sm leading-7 text-slate-600">{tr(item, "short_desc") || tr(item, "detailed_desc")}</p></Link></Reveal>)}</div><div className="mt-6 text-end"><Link to="/solutions" className="inline-flex items-center gap-2 text-sm font-bold text-electric">{t("جميع الحلول")} <ArrowLeft className="h-4 w-4" /></Link></div></div></section>;
+}
+
+export function HomeAbout({ settings }) {
+  const summary = tr(settings, "about_short") || tr(settings, "about_content");
+  if (!summary) return null;
+  return <section className="py-16 sm:py-20" data-testid="home-about-section"><div className="container-x grid gap-6 rounded-3xl border border-slate-200 bg-white p-7 sm:p-10 lg:grid-cols-[auto_1fr_auto] lg:items-center"><div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-electric-50 text-electric"><Building2 className="h-7 w-7" /></div><div><span className="text-xs font-bold text-electric">{t("من نحن")}</span><h2 className="mt-2 text-xl font-extrabold text-slate-900 sm:text-2xl">{tr(settings, "company_name") || "2Morro Technology Solutions"}</h2><p className="mt-2 max-w-3xl text-sm leading-7 text-slate-600">{summary}</p></div><Link to="/about" className="btn-outline whitespace-nowrap">{t("تعرف على الشركة")} <ArrowLeft className="h-4 w-4" /></Link></div></section>;
+}
+
+export function HomeSectors({ sectors }) {
+  if (!sectors?.length) return null;
+  return <section className="py-16 sm:py-20" data-testid="home-sectors-section"><div className="container-x"><Reveal><div className="mb-8 max-w-2xl"><span className="chip border-electric/20 bg-electric-50 text-electric">{t("القطاعات")}</span><h2 className="mt-4 text-2xl font-bold text-slate-900 sm:text-3xl">{t("قطاعات نعمل على دعمها")}</h2></div></Reveal><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{sectors.slice(0, 6).map((sector, i) => <Reveal key={sector.id} delay={i * 40}><Link to={`/sectors/${sector.slug}`} className="flex h-full items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 transition hover:border-electric/40 hover:shadow-md"><Building2 className="h-5 w-5 shrink-0 text-electric" /><span className="font-bold text-slate-800">{tr(sector, "name")}</span><ArrowLeft className="ms-auto h-4 w-4 text-slate-400" /></Link></Reveal>)}</div><div className="mt-5 text-end"><Link to="/sectors" className="text-sm font-bold text-electric">{t("استعراض القطاعات")}</Link></div></div></section>;
+}
+
+export function HomeTechnology({ technologies }) {
+  if (!technologies?.length) return null;
+  return <section className="bg-slate-50 py-16 sm:py-20" data-testid="home-technology-section"><div className="container-x"><Reveal><div className="mb-8 max-w-2xl"><span className="chip border-electric/20 bg-electric-50 text-electric">{t("منظومة التقنيات")}</span><h2 className="mt-4 text-2xl font-bold text-slate-900 sm:text-3xl">{t("تقنيات ومنصات ضمن خبراتنا")}</h2></div></Reveal><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{technologies.slice(0, 8).map((technology, i) => <Reveal key={technology.id} delay={i * 35}><div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4"><Cpu className="h-5 w-5 shrink-0 text-electric" /><span className="text-sm font-bold text-slate-800">{tr(technology, "name")}</span></div></Reveal>)}</div><div className="mt-5 text-end"><Link to="/technology" className="text-sm font-bold text-electric">{t("استعراض المنظومة التقنية")}</Link></div></div></section>;
+}
+
+export function HomeKnowledge({ articles }) {
+  if (!articles?.length) return null;
+  return <section className="py-16 sm:py-20" data-testid="home-knowledge-section"><div className="container-x"><Reveal><div className="mb-8 flex flex-wrap items-end justify-between gap-4"><div><span className="chip border-electric/20 bg-electric-50 text-electric">{t("مركز المعرفة")}</span><h2 className="mt-4 text-2xl font-bold text-slate-900 sm:text-3xl">{t("المقالات والموارد")}</h2></div><Link to="/knowledge" className="text-sm font-bold text-electric">{t("جميع المقالات")}</Link></div></Reveal><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{articles.slice(0, 3).map((article, i) => <Reveal key={article.id} delay={i * 50}><Link to={`/knowledge/${article.slug}`} className="block h-full rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-lg"><BookOpen className="h-5 w-5 text-electric" /><h3 className="mt-3 font-bold text-slate-900">{tr(article, "title")}</h3><p className="mt-2 line-clamp-3 text-sm leading-7 text-slate-600">{tr(article, "summary")}</p></Link></Reveal>)}</div></div></section>;
 }
 
 export function HomeServices({ services, loading }) {
@@ -204,7 +235,7 @@ export function HomeProjects({ projects, loading }) {
   );
 }
 
-export function HomeMethodology({ settings, models }) {
+export function HomeMethodology({ settings, phases }) {
   return (
     <section className="relative overflow-hidden bg-navy-900 py-20 sm:py-24" data-testid="home-methodology-section">
       <div className="grid-pattern absolute inset-0" aria-hidden="true" />
@@ -217,7 +248,7 @@ export function HomeMethodology({ settings, models }) {
           </div>
         </Reveal>
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          {(models || []).slice(0, 5).map((m, i) => (
+          {(phases || []).slice(0, 5).map((m, i) => (
             <Reveal key={m.id} delay={i * 80}>
               <div className="relative h-full rounded-xl border border-white/10 bg-navy-700/60 p-5 backdrop-blur-sm transition-all duration-300 hover:border-aqua/40" data-testid={`home-methodology-step-${i}`}>
                 <span className="font-heading text-3xl font-black text-electric/60">0{i + 1}</span>
@@ -228,8 +259,8 @@ export function HomeMethodology({ settings, models }) {
           ))}
         </div>
         <Reveal>
-          <Link to="/models" className="mt-10 inline-flex items-center gap-2 text-sm font-bold text-aqua transition-colors hover:text-white" data-testid="home-all-models-link">
-            {t("استعرض نماذج التنفيذ كاملة")}
+          <Link to="/methodology" className="mt-10 inline-flex items-center gap-2 text-sm font-bold text-aqua transition-colors hover:text-white" data-testid="home-all-methodology-link">
+            {t("استعرض منهجية العمل كاملة")}
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Reveal>

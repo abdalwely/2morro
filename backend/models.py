@@ -33,6 +33,8 @@ class ServiceIn(BaseModel):
     image_url: str = ''
     features: List[str] = []
     category: str = ''
+    domain_id: str = ''
+    technology_ids: List[str] = []
     order: int = 0
     published: bool = False
     seo_title: str = Field(default='', max_length=200)
@@ -48,6 +50,8 @@ class Service(BaseDocument):
     image_url: str = ''
     features: List[str] = []
     category: str = ''
+    domain_id: str = ''
+    technology_ids: List[str] = []
     order: int = 0
     published: bool = False
     is_demo: bool = False
@@ -70,6 +74,8 @@ class DeliveryModelIn(BaseModel):
     outputs: List[str] = []
     image_url: str = ''
     duration: str = ''
+    scope: str = ''
+    service_ids: List[str] = []
     order: int = 0
     published: bool = False
 
@@ -83,6 +89,8 @@ class DeliveryModel(BaseDocument):
     outputs: List[str] = []
     image_url: str = ''
     duration: str = ''
+    scope: str = ''
+    service_ids: List[str] = []
     order: int = 0
     published: bool = False
     is_demo: bool = False
@@ -97,13 +105,21 @@ class ProjectIn(BaseModel):
     main_image_url: str = ''
     gallery_urls: List[str] = []
     category: str = ''
+    category_id: str = ''
     technologies: List[str] = []
+    technology_ids: List[str] = []
+    service_ids: List[str] = []
+    solution_ids: List[str] = []
+    sector_ids: List[str] = []
+    delivery_model_ids: List[str] = []
     goals: str = ''
     outputs: str = ''
     external_url: str = ''
     service_id: str = ''
     order: int = 0
     published: bool = False
+    seo_title: str = ''
+    seo_description: str = ''
 
 
 class Project(BaseDocument):
@@ -114,7 +130,13 @@ class Project(BaseDocument):
     main_image_url: str = ''
     gallery_urls: List[str] = []
     category: str = ''
+    category_id: str = ''
     technologies: List[str] = []
+    technology_ids: List[str] = []
+    service_ids: List[str] = []
+    solution_ids: List[str] = []
+    sector_ids: List[str] = []
+    delivery_model_ids: List[str] = []
     goals: str = ''
     outputs: str = ''
     external_url: str = ''
@@ -123,6 +145,8 @@ class Project(BaseDocument):
     published: bool = False
     is_demo: bool = False
     slug: str = ''
+    seo_title: str = ''
+    seo_description: str = ''
 
 
 class SettingsIn(BaseModel):
@@ -148,6 +172,17 @@ class SettingsIn(BaseModel):
     copyright_text_en: Optional[str] = None
     en: Optional[dict] = None
     pages: Optional[dict] = None
+    company_profile: Optional[dict] = None
+    homepage: Optional[dict] = None
+    seo: Optional[dict] = None
+    privacy_policy: Optional[dict] = None
+    terms: Optional[dict] = None
+    founding_date: Optional[str] = None
+    address: Optional[str] = None
+    phone: Optional[str] = None
+    website: Optional[str] = None
+    company_profile_pdf_url: Optional[str] = None
+    business_hours: Optional[dict] = None
 
 
 class ThemeIn(BaseModel):

@@ -1,12 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronDown, Clock, CheckCircle2, Route, Info } from "lucide-react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Clock, CheckCircle2, Route, Info } from "lucide-react";
 import api from "@/lib/api";
 import { useSEO } from "@/hooks/useSEO";
 import Navbar from "@/components/site/Navbar";
@@ -18,9 +12,10 @@ import {
   EmptyState,
   ApiErrorNotice,
 } from "@/components/site/Shared";
-import { t, tr } from "@/lib/i18n";
+import { t, tr, trPage } from "@/lib/i18n";
 
 export default function Models() {
+  const { data: settings } = useQuery({ queryKey: ["settings"], queryFn: () => api.get("/settings").then(r => r.data) });
   const {
     data: models,
     isLoading,
@@ -30,10 +25,9 @@ export default function Models() {
     queryFn: () => api.get("/delivery-models").then((r) => r.data),
   });
   useSEO({
-    title: t("نماذج التنفيذ | 2Morro Technically Solutions"),
-    description: t(
-      "نماذج تنفيذ الأعمال في 2Morro Technically Solutions: مراحل تنفيذ المشاريع والمخرجات المتوقعة ومدد التنفيذ التقريبية.",
-    ),
+    title: `${trPage(settings, "models", "title") || t("نماذج التنفيذ")} | 2Morro Technology Solutions`,
+    description: trPage(settings, "models", "subtitle") || t("أساليب التعاقد والتوريد والتنفيذ والتشغيل والدعم في 2Morro Technology Solutions."),
+    image: settings?.seo?.og_image_url || settings?.logo_url,
   });
 
   const hasDemo = (models || []).some((m) => m.is_demo);
@@ -44,9 +38,9 @@ export default function Models() {
       <PageHeader
         page="models"
         badge={t("نماذج التنفيذ")}
-        title={t("منهجية عمل مرحلية… من التحليل إلى الدعم")}
+        title={t("نماذج مرنة لتقديم وتنفيذ الخدمات") }
         subtitle={t(
-          "نماذج توضح أسلوبنا في تنفيذ المشاريع وإدارة مراحل العمل والمخرجات المتوقعة من كل مرحلة.",
+          "تعرف على طرق التعاقد والتوريد والتنفيذ والتشغيل والدعم التي يمكن الاتفاق عليها بحسب نطاق كل مشروع.",
         )}
       />
 
@@ -113,81 +107,21 @@ export default function Models() {
                         <p className="mt-2 text-sm leading-relaxed text-slate-600">
                           {tr(m, "short_desc")}
                         </p>
+                        {tr(m, "scope") && <p className="mt-3 text-sm leading-7 text-slate-600">{tr(m, "scope")}</p>}
 
-                        {(tr(m, "phases")?.length > 0 ||
-                          tr(m, "outputs")?.length > 0) && (
-                          <Accordion type="single" collapsible className="mt-4">
-                            <AccordionItem
-                              value={`phases-${m.id}`}
-                              className="border-slate-200"
-                            >
-                              <AccordionTrigger
-                                className="py-3 text-sm font-bold text-electric hover:no-underline"
-                                data-testid={`model-phases-toggle-${m.id}`}
-                              >
-                                <span className="flex items-center gap-2">
-                                  <Route className="h-4 w-4" />
-                                  {t("مراحل التنفيذ")} (
-                                  {tr(m, "phases")?.length || 0})
-                                </span>
-                              </AccordionTrigger>
-                              <AccordionContent className="pb-2">
-                                <ol className="relative space-y-4 border-s-2 border-dashed border-electric/20 ps-5">
-                                  {(tr(m, "phases") || []).map((ph, idx) => (
-                                    <li
-                                      key={`${ph.title}-${idx}`}
-                                      className="relative"
-                                      data-testid={`model-phase-${m.id}-${idx}`}
-                                    >
-                                      <span
-                                        className="absolute -start-[27px] top-1 h-3.5 w-3.5 rounded-full border-2 border-electric bg-white"
-                                        aria-hidden="true"
-                                      />
-                                      <h3 className="text-sm font-bold text-slate-800">
-                                        {ph.title}
-                                      </h3>
-                                      {ph.desc && (
-                                        <p className="mt-1 text-xs leading-relaxed text-slate-500">
-                                          {ph.desc}
-                                        </p>
-                                      )}
-                                    </li>
-                                  ))}
-                                </ol>
-                              </AccordionContent>
-                            </AccordionItem>
-                            {tr(m, "outputs")?.length > 0 && (
-                              <AccordionItem
-                                value={`outputs-${m.id}`}
-                                className="border-b-0"
-                              >
-                                <AccordionTrigger
-                                  className="py-3 text-sm font-bold text-electric hover:no-underline"
-                                  data-testid={`model-outputs-toggle-${m.id}`}
-                                >
-                                  <span className="flex items-center gap-2">
-                                    <CheckCircle2 className="h-4 w-4" />
-                                    {t("المخرجات المتوقعة")} (
-                                    {tr(m, "outputs").length})
-                                  </span>
-                                </AccordionTrigger>
-                                <AccordionContent className="pb-2">
-                                  <ul className="space-y-2">
-                                    {tr(m, "outputs").map((o, idx) => (
-                                      <li
-                                        key={o}
-                                        className="flex items-start gap-2 text-sm text-slate-600"
-                                        data-testid={`model-output-${m.id}-${idx}`}
-                                      >
-                                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-electric" />
-                                        {o}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </AccordionContent>
-                              </AccordionItem>
-                            )}
-                          </Accordion>
+                        {tr(m, "outputs")?.length > 0 && (
+                          <div className="mt-4 border-t border-slate-100 pt-4">
+                            <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-electric">
+                              <CheckCircle2 className="h-4 w-4" /> {t("المخرجات أو نطاق الخدمة")}
+                            </h3>
+                            <ul className="space-y-2">
+                              {tr(m, "outputs").map((o, idx) => (
+                                <li key={`${o}-${idx}`} className="flex items-start gap-2 text-sm text-slate-600">
+                                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-electric" /> {o}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
                         )}
                       </div>
                     </div>

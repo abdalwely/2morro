@@ -13,9 +13,10 @@ import {
   EmptyState,
   ApiErrorNotice,
 } from "@/components/site/Shared";
-import { t, tr } from "@/lib/i18n";
+import { t, tr, trPage } from "@/lib/i18n";
 
 export default function Projects() {
+  const { data: settings } = useQuery({ queryKey: ["settings"], queryFn: () => api.get("/settings").then(r => r.data) });
   const [category, setCategory] = useState(t("الكل"));
   const {
     data: projects,
@@ -26,15 +27,14 @@ export default function Projects() {
     queryFn: () => api.get("/projects").then((r) => r.data),
   });
   useSEO({
-    title: t("مشاريعنا | 2Morro Technically Solutions"),
-    description: t(
-      "استعرض معرض أعمال 2Morro Technically Solutions: مشاريع وأنظمة وحلول رقمية نماذج منها تعكس منهجيتنا في التنفيذ.",
-    ),
+    title: `${trPage(settings, "projects", "title") || t("مشاريعنا")} | 2Morro Technology Solutions`,
+    description: trPage(settings, "projects", "subtitle") || t("استعرض معرض أعمال 2Morro Technology Solutions: مشاريع وأنظمة وحلول رقمية نماذج منها تعكس منهجيتنا في التنفيذ."),
+    image: settings?.seo?.og_image_url || settings?.logo_url,
   });
 
   const categories = useMemo(() => {
     const set = new Set(
-      (projects || []).map((p) => tr(p, "category")).filter(Boolean),
+      (projects || []).map((p) => tr(p.relations?.category_id?.[0], "name") || tr(p, "category")).filter(Boolean),
     );
     return [t("الكل"), ...Array.from(set)];
   }, [projects]);
@@ -42,7 +42,7 @@ export default function Projects() {
   const filtered =
     category === t("الكل")
       ? projects || []
-      : (projects || []).filter((p) => tr(p, "category") === category);
+      : (projects || []).filter((p) => (tr(p.relations?.category_id?.[0], "name") || tr(p, "category")) === category);
   const hasDemo = (projects || []).some((p) => p.is_demo);
 
   return (
@@ -51,9 +51,9 @@ export default function Projects() {
       <PageHeader
         page="projects"
         badge={t("مشاريعنا")}
-        title={t("معرض أعمال يعكس جودة التنفيذ")}
+        title={t("مجالات المشاريع ونماذج العرض")}
         subtitle={t(
-          "نماذج من المشاريع والحلول التي صممناها وطوّرناها، مصنفة حسب نوع الحل التقني.",
+          "تصنيفات مجالات المشاريع الواردة في الملف التعريفي، مع نماذج عرض تجريبية توضح شكل المحتوى قبل إضافة دراسات حالة موثقة.",
         )}
       />
 

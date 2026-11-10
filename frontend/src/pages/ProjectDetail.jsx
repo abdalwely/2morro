@@ -21,7 +21,7 @@ function ProjectHeader({ project }) {
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-extrabold text-white sm:text-3xl lg:text-4xl" data-testid="project-detail-title">{tr(project, "name")}</h1>
           {project.is_demo && <DemoBadge />}
-          {tr(project, "category") && <span className="chip border-aqua/30 bg-aqua/10 text-aqua">{tr(project, "category")}</span>}
+          {(tr(project, "category") || tr(project.relations?.category_id?.[0], "name")) && <span className="chip border-aqua/30 bg-aqua/10 text-aqua">{tr(project, "category") || tr(project.relations?.category_id?.[0], "name")}</span>}
         </div>
         <p className="mt-3 max-w-2xl text-slate-300">{tr(project, "short_desc")}</p>
       </div>
@@ -32,10 +32,10 @@ function ProjectHeader({ project }) {
 function ProjectSidebar({ project, relatedService, wa, email }) {
   return (
     <aside className="space-y-6">
-      {project.technologies?.length > 0 && (
+      {(project.technologies?.length > 0 || project.relations?.technology_ids?.length > 0) && (
         <InfoCard icon={Cpu} title={t("التقنيات المستخدمة")}>
           <div className="mt-3 flex flex-wrap gap-2">
-            {project.technologies.map((t, i) => (
+            {[...(project.technologies || []), ...(project.relations?.technology_ids || []).map(x => tr(x, "name"))].map((t, i) => (
               <span key={t} className="chip border-electric/20 bg-white text-electric" data-testid={`project-tech-${i}`}>{t}</span>
             ))}
           </div>
@@ -51,7 +51,10 @@ function ProjectSidebar({ project, relatedService, wa, email }) {
           <p className="mt-2 text-sm leading-relaxed text-slate-600">{tr(project, "outputs")}</p>
         </InfoCard>
       )}
-      {relatedService && <RelatedService service={relatedService} />}
+      {(project.relations?.service_ids?.length > 1) && <InfoCard icon={Cpu} title={t("الخدمات المرتبطة")}><div className="mt-3 flex flex-wrap gap-2">{project.relations.service_ids.map(s => <span key={s.id} className="chip border-electric/20 bg-white text-electric">{tr(s, "name")}</span>)}</div></InfoCard>}
+      {(project.relations?.solution_ids?.length > 0) && <InfoCard icon={Cpu} title={t("الحلول المرتبطة")}><div className="mt-3 flex flex-wrap gap-2">{project.relations.solution_ids.map(s => <span key={s.id} className="chip border-electric/20 bg-white text-electric">{tr(s, "name")}</span>)}</div></InfoCard>}
+      {(project.relations?.sector_ids?.length > 0) && <InfoCard icon={Cpu} title={t("القطاعات") }><div className="mt-3 flex flex-wrap gap-2">{project.relations.sector_ids.map(s => <span key={s.id} className="chip border-electric/20 bg-white text-electric">{tr(s, "name")}</span>)}</div></InfoCard>}
+      {relatedService && (!project.relations?.service_ids?.length || project.relations.service_ids.length === 1) && <RelatedService service={relatedService} />}
       {project.external_url && (
         <a href={project.external_url} target="_blank" rel="noopener noreferrer" className="btn-outline w-full" data-testid="project-external-link">
           <ExternalLink className="h-4 w-4" />
@@ -80,8 +83,10 @@ export default function ProjectDetail() {
   const { data: services } = useQuery({ queryKey: ["services"], queryFn: fetcher("/services") });
 
   useSEO({
-    title: project ? t("{name} | مشاريع 2Morro Technically Solutions", { name: tr(project, "name") }) : t("المشروع | 2Morro Technically Solutions"),
-    description: tr(project, "short_desc"),
+    title: project ? (tr(project, "seo_title") || t("{name} | مشاريع 2Morro Technology Solutions", { name: tr(project, "name") })) : t("المشروع | 2Morro Technology Solutions"),
+    description: tr(project, "seo_description") || tr(project, "short_desc"),
+    image: project?.main_image_url,
+    schema: project ? { "@context": "https://schema.org", "@type": "CreativeWork", name: tr(project, "name"), description: tr(project, "short_desc"), image: project.main_image_url || undefined, creator: { "@type": "Organization", name: "2Morro Technology Solutions" } } : undefined,
   });
 
   if (isLoading) return <DetailLoading />;
@@ -92,7 +97,7 @@ export default function ProjectDetail() {
     );
   }
 
-  const relatedService = (services || []).find((s) => s.id === project.service_id);
+  const relatedService = (project.relations?.service_ids || []).find(s => s.id) || (services || []).find((s) => s.id === project.service_id);
   const wa = settings?.whatsapp_number
     ? waLink(settings.whatsapp_number, t("مرحبًا، شاهدت مشروع «{name}» وأود الاستفسار عن خدمات مشابهة", { name: tr(project, "name") }))
     : "";

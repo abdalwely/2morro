@@ -26,8 +26,11 @@ const LINKS = [
   { to: "/", label: "الرئيسية" },
   { to: "/about", label: "من نحن" },
   { to: "/services", label: "خدماتنا" },
+  { to: "/solutions", label: "حلولنا" },
   { to: "/projects", label: "مشاريعنا" },
+  { to: "/methodology", label: "منهجية العمل" },
   { to: "/models", label: "نماذج التنفيذ" },
+  { to: "/knowledge", label: "المعرفة" },
   { to: "/contact", label: "تواصل معنا" },
 ];
 
@@ -71,7 +74,7 @@ export default function Navbar() {
       <div className="container-x flex h-18 items-center justify-between py-3">
         <Brand settings={settings} />
 
-        <div className="hidden items-center gap-1 lg:flex">
+        <div className="hidden items-center gap-0 xl:flex">
           {LINKS.map((l) => (
             <NavLink
               key={l.to}
@@ -94,10 +97,10 @@ export default function Navbar() {
           </Link>
         </div>
 
-        <div className="flex items-center gap-2 lg:hidden">
+        <div className="flex items-center gap-2 xl:hidden">
         <LangToggle testid="navbar-mobile-lang-toggle" />
         <button
-          className="rounded-lg p-2 text-white transition-colors hover:bg-white/10 lg:hidden"
+          className="rounded-lg p-2 text-white transition-colors hover:bg-white/10 xl:hidden"
           onClick={() => setOpen(!open)}
           aria-label={open ? t("إغلاق القائمة") : t("فتح القائمة")}
           aria-expanded={open}
@@ -109,7 +112,7 @@ export default function Navbar() {
       </div>
 
       {open && (
-        <div className="glass-nav border-t border-white/10 lg:hidden" data-testid="navbar-mobile-menu">
+        <div className="glass-nav border-t border-white/10 xl:hidden" data-testid="navbar-mobile-menu">
           <div className="container-x flex flex-col gap-1 py-4">
             {LINKS.map((l) => (
               <NavLink

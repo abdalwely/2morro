@@ -10,7 +10,7 @@ export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  useSEO({ title: "تسجيل دخول المسؤول | لوحة التحكم", description: "تسجيل دخول لوحة التحكم الإدارية." });
+  useSEO({ title: "تسجيل دخول المسؤول | لوحة التحكم", description: "تسجيل دخول لوحة التحكم الإدارية.", robots: "noindex,nofollow" });
 
   useEffect(() => {
     if (user) navigate("/admin", { replace: true });
@@ -34,7 +34,7 @@ export default function AdminLogin() {
         <div className="text-center">
           <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-electric font-heading text-xl font-black text-white">2M</span>
           <h1 className="mt-4 font-heading text-2xl font-extrabold text-white" data-testid="admin-login-title">لوحة التحكم الإدارية</h1>
-          <p className="mt-1.5 text-sm text-slate-400">2Morro Technically Solutions — دخول المسؤولين فقط</p>
+          <p className="mt-1.5 text-sm text-slate-400">2Morro Technology Solutions — دخول المسؤولين فقط</p>
         </div>
 
         <form onSubmit={submit} className="mt-8 space-y-5" data-testid="admin-login-form">
