@@ -57,7 +57,12 @@ export default function AdminLayout() {
           </div>
         </div>
 
-        <nav className="flex-1 space-y-1 p-4">
+        <nav
+          className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain p-4"
+          style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(148, 163, 184, 0.55) transparent" }}
+          data-testid="admin-sidebar-nav"
+          aria-label="القائمة الرئيسية للوحة التحكم"
+        >
           {NAV.filter((n) => !n.adminOnly || user?.role === "admin").map((n) => (
             <NavLink
               key={n.to}
@@ -76,7 +81,7 @@ export default function AdminLayout() {
           ))}
         </nav>
 
-        <div className="border-t border-white/10 p-4">
+        <div className="shrink-0 border-t border-white/10 p-4">
           <Link to="/" target="_blank" className="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-bold text-slate-300 transition-colors hover:bg-white/10 hover:text-aqua" data-testid="admin-view-site-link">
             <ExternalLink className="h-[18px] w-[18px]" />
             معاينة الموقع
